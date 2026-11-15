@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Dashboard | NabhaLearn</title>
+  <meta name="description" content="Explore digital video lessons, interactive quizzes, assignments, and track your learning progress on NabhaLearn." />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="dashboard-body">
+
+  <!-- Navigation Header for Dashboard -->
+  <header class="navbar-header">
+    <div class="container nav-container">
+      <a href="dashboard.html" class="logo-group" id="logoLink">
+        <div class="logo-icon-wrapper">🌱</div>
+        <div class="brand-title">
+          <div class="brand-name">Nabha<span class="blue">Learn</span></div>
+          <div class="brand-tagline">Student Digital Dashboard</div>
+        </div>
+      </a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#dashboardHero" class="nav-item active">Dashboard</a></li>
+        <li><a href="#subjects" class="nav-item">Courses</a></li>
+        <li><a href="#journey" class="nav-item">Progress</a></li>
+        <li><a href="#achievements" class="nav-item">Badges</a></li>
+      </ul>
+
+      <div class="nav-right-actions">
+        <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle Theme">☀️</button>
+        
+        <!-- Student Profile Chip -->
+        <div class="student-profile-chip" id="studentProfileChip">
+          <span class="chip-avatar">🎒</span>
+          <div class="chip-info">
+            <span class="chip-name" id="displayStudentName">Rahul Sharma</span>
+            <span class="chip-class" id="displayStudentClass">Class 6th</span>
+          </div>
+        </div>
+
+        <button class="btn-pill btn-logout" id="logoutBtn" onclick="handleLogout()">Logout 🚪</button>
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle Navigation">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dashboard Welcome Hero Banner -->
+  <section class="dashboard-hero-section" id="dashboardHero">
+    <div class="container dashboard-hero-grid">
+      <div class="dash-welcome-text">
+        <div class="dash-greeting-badge">
+          ✨ Welcome Back to Your Learning Hub!
+        </div>
+        <h1 class="dash-headline">
+          Hello, <span class="highlight-blue" id="dashHeroStudentName">Rahul!</span> 👋
+        </h1>
+        <p class="dash-subtext">
+          Ready to continue your adventure? You have completed <strong>18 lessons</strong> this week and earned <strong>3 star badges!</strong>
+        </p>
+
+        <div class="dash-quick-stats">
+          <div class="stat-pill">
+            <span class="stat-icon">🔥</span>
+            <span><strong>5 Day</strong> Streak</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-icon">⭐</span>
+            <span><strong>820</strong> XP Points</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-icon">🏆</span>
+            <span><strong>3 Badges</strong> Earned</span>
+          </div>
+        </div>
+
+        <div class="dash-cta-row">
+          <a href="#subjects" class="btn-cta-primary">
+            ▶ Continue Learning
+          </a>
+          <button class="btn-cta-secondary" onclick="alert('⚡ Quick Quiz: Test your Math Algebra skills! Question 1: If 2x + 4 = 10, what is x? Correct answer is 3!')">
+            ⚡ Quick Practice Quiz
+          </button>
+        </div>
+      </div>
+
+      <div class="dash-illustration-card">
+        <div class="dash-card-header">
+          <span>📖 Resume Recent Lesson</span>
+          <span class="badge-tag">Class 6th</span>
+        </div>
+        <div class="recent-lesson-box">
+          <div class="lesson-icon-circle">🧮</div>
+          <div class="lesson-details">
+            <h4>Mathematics: Geometry & Shapes</h4>
+            <p>15 mins • Interactive Practice</p>
+            <div class="mini-progress-bar">
+              <div class="mini-progress-fill" style="width: 70%;"></div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-pill btn-register full-width-btn" onclick="completeLesson('Geometry & Shapes')">
+          Resume Lesson ▶
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature Ribbon Row -->
+  <section class="container features-ribbon-wrapper">
+    <div class="features-ribbon-card">
+      <div class="ribbon-item" onclick="alert('📺 Opening Video Lessons Hub...')">
+        <div class="ribbon-icon-circle ribbon-icon-pink">📺</div>
+        <div class="ribbon-text">
+          <h4>Video Lessons</h4>
+          <p>Learn with fun videos</p>
+        </div>
+      </div>
+
+      <div class="ribbon-item" onclick="alert('❓ Opening Interactive Quizzes...')">
+        <div class="ribbon-icon-circle ribbon-icon-teal">❓</div>
+        <div class="ribbon-text">
+          <h4>Quizzes</h4>
+          <p>Test your knowledge</p>
+        </div>
+      </div>
+
+      <div class="ribbon-item" onclick="alert('📄 Opening Student Assignments...')">
+        <div class="ribbon-icon-circle ribbon-icon-yellow">📄</div>
+        <div class="ribbon-text">
+          <h4>Assignments</h4>
+          <p>Practice & improve</p>
+        </div>
+      </div>
+
+      <div class="ribbon-item" onclick="document.getElementById('journey').scrollIntoView({behavior:'smooth'})">
+        <div class="ribbon-icon-circle ribbon-icon-purple">📊</div>
+        <div class="ribbon-text">
+          <h4>Progress Tracking</h4>
+          <p>See your growth</p>
+        </div>
+      </div>
+
+      <div class="ribbon-item" onclick="document.getElementById('achievements').scrollIntoView({behavior:'smooth'})">
+        <div class="ribbon-icon-circle ribbon-icon-red">⭐</div>
+        <div class="ribbon-text">
+          <h4>Earn Badges</h4>
+          <p>Stay motivated</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Subjects Section -->
+  <section class="subjects-section" id="subjects">
+    <div class="container">
+      <div class="subjects-header">
+        <div class="subjects-header-left">
+          <h2>📖 Popular Subjects</h2>
+          <p>Select a course subject to view video lessons, quizzes and projects!</p>
+        </div>
+        <a href="#subjects" class="view-all-link">View All Courses →</a>
+      </div>
+
+      <div class="subjects-grid">
+        <!-- Math -->
+        <div class="subject-card card-math" data-subject="math">
+          <div>
+            <div class="subject-icon-box">🧮</div>
+            <div class="subject-title">Mathematics</div>
+            <div class="subject-grade">Class 6 – 10</div>
+          </div>
+          <div class="subject-footer">
+            <span>3 Lessons Available</span>
+            <div class="subject-arrow-btn">➔</div>
+          </div>
+        </div>
+
+        <!-- Science -->
+        <div class="subject-card card-science" data-subject="science">
+          <div>
+            <div class="subject-icon-box">🧪</div>
+            <div class="subject-title">Science</div>
+            <div class="subject-grade">Class 6 – 10</div>
+          </div>
+          <div class="subject-footer">
+            <span>3 Lessons Available</span>
+            <div class="subject-arrow-btn">➔</div>
+          </div>
+        </div>
+
+        <!-- English -->
+        <div class="subject-card card-english" data-subject="english">
+          <div>
+            <div class="subject-icon-box">📖</div>
+            <div class="subject-title">English</div>
+            <div class="subject-grade">Class 6 – 10</div>
+          </div>
+          <div class="subject-footer">
+            <span>3 Lessons Available</span>
+            <div class="subject-arrow-btn">➔</div>
+          </div>
+        </div>
+
+        <!-- Computer Science -->
+        <div class="subject-card card-cs" data-subject="cs">
+          <div>
+            <div class="subject-icon-box">💻</div>
+            <div class="subject-title">Computer Science</div>
+            <div class="subject-grade">Class 6 – 10</div>
+          </div>
+          <div class="subject-footer">
+            <span>3 Lessons Available</span>
+            <div class="subject-arrow-btn">➔</div>
+          </div>
+        </div>
+
+        <!-- General Knowledge -->
+        <div class="subject-card card-gk" data-subject="gk">
+          <div>
+            <div class="subject-icon-box">🌍</div>
+            <div class="subject-title">General Knowledge</div>
+            <div class="subject-grade">Class 6 – 10</div>
+          </div>
+          <div class="subject-footer">
+            <span>3 Lessons Available</span>
+            <div class="subject-arrow-btn">➔</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Your Learning Journey Section -->
+  <section class="journey-section" id="journey">
+    <div class="container journey-container">
+      <div class="journey-doodle-left">
+        <div class="doodle-text">
+          Better<br>Education<br>Brighter<br>Future ♡
+        </div>
+      </div>
+
+      <div class="journey-card-main">
+        <div class="journey-card-header">
+          <span>📈</span> Your Learning Journey
+        </div>
+
+        <div class="journey-stats-row">
+          <div class="jstat-box">
+            <div class="jstat-icon" style="background: #e0f2fe; color: #0284c7;">📖</div>
+            <div>
+              <div class="jstat-lbl">Lessons Completed</div>
+              <div class="jstat-val" id="completedLessonsCount">18 / 25</div>
+            </div>
+          </div>
+
+          <div class="jstat-box">
+            <div class="jstat-icon" style="background: #f3e8ff; color: #a855f7;">❓</div>
+            <div>
+              <div class="jstat-lbl">Quiz Score</div>
+              <div class="jstat-val">82%</div>
+            </div>
+          </div>
+
+          <div class="jstat-box">
+            <div class="jstat-icon" style="background: #fef3c7; color: #d97706;">⭐</div>
+            <div>
+              <div class="jstat-lbl">Overall Progress</div>
+              <div class="jstat-val" id="overallProgressPercent">72%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-track-wrapper">
+          <span class="progress-percentage-label" id="progressTextLabel">72%</span>
+          <div class="progress-track-bg">
+            <div class="progress-track-fill" id="progressTrackFill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="journey-doodle-right">
+        <div class="doodle-badge">
+          You Can Do It! ♡
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Star Badges & Achievements Section -->
+  <section class="achievements-section container" id="achievements">
+    <div class="achievements-card">
+      <div class="achievements-header">
+        <h3>🏆 Star Badges & Achievements</h3>
+        <p>Complete quizzes and lessons to unlock special achievement badges!</p>
+      </div>
+      <div class="badges-grid">
+        <div class="badge-item unlocked">
+          <div class="badge-icon-wrap">🌟</div>
+          <h4>Math Whiz</h4>
+          <p>Completed 5 Math Lessons</p>
+        </div>
+        <div class="badge-item unlocked">
+          <div class="badge-icon-wrap">🧪</div>
+          <h4>Science Genius</h4>
+          <p>Scored 90%+ on Physics Quiz</p>
+        </div>
+        <div class="badge-item unlocked">
+          <div class="badge-icon-wrap">💻</div>
+          <h4>Code Starter</h4>
+          <p>Created HTML Web Page</p>
+        </div>
+        <div class="badge-item locked">
+          <div class="badge-icon-wrap">📚</div>
+          <h4>Bookworm</h4>
+          <p>Read 10 English Stories</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subject Details Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+      <button class="modal-close-btn" id="modalCloseBtn">✕</button>
+      <h3 id="modalSubjectTitle" style="font-size: 1.6rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-dark);">
+        Subject Title
+      </h3>
+      <div id="modalSubjectBody">
+        <!-- Content inserted dynamically by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer-simple">
+    <div class="container">
+      <p>© 2026 <strong>NabhaLearn</strong> — Empowering Rural School Students of Nabha with Digital Education.</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="js/app.js"></script>
+</body>
+</html>
