@@ -207,10 +207,12 @@ public class SeedDataLoader implements ApplicationRunner {
                 .limit(2)
                 .toList();
         for (Assignment assignment : assignments) {
+            String dueText = assignment.getDueDate() == null
+                    ? "No due date set."
+                    : "Due in " + Math.max(0, Duration.between(Instant.now(), assignment.getDueDate()).toDays()) + " days. ";
             notificationService.notify(demo.getId(), NotificationType.ASSIGNMENT_NEW,
                     "New assignment: " + assignment.getTitle(),
-                    "Due in " + Duration.between(Instant.now(), assignment.getDueDate()).toDays() + " days. "
-                            + "Open the assignment to read the instructions.",
+                    dueText + "Open the assignment to read the instructions.",
                     "/app/assignments/" + assignment.getId(),
                     "assignment-new:" + assignment.getId());
         }

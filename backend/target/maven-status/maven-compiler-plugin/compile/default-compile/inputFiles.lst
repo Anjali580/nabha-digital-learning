@@ -44,6 +44,9 @@
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/config/MongoConfig.java
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/config/SecurityConfig.java
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/config/SpaController.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/contact/ContactController.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/contact/ContactMessage.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/contact/ContactMessageRepository.java
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/dashboard/DashboardController.java
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/dashboard/DashboardResponse.java
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/dashboard/DashboardService.java

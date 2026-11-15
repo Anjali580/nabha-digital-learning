@@ -32,9 +32,11 @@ com/nabhaleam/quizzes/QuizService.class
 com/nabhaleam/students/dto/UpdateProfileRequest.class
 com/nabhaleam/quizzes/QuizAttemptRepository.class
 com/nabhaleam/chapters/dto/ChapterSummary.class
+com/nabhaleam/contact/ContactMessageRepository.class
 com/nabhaleam/config/AppProperties$Upload.class
 com/nabhaleam/users/StudentPreferences$StudentPreferencesBuilder.class
 com/nabhaleam/classes/SchoolClassController.class
+com/nabhaleam/contact/ContactController.class
 com/nabhaleam/assignments/AssignmentRepository.class
 com/nabhaleam/quizzes/QuizQuestion$QuizQuestionBuilder.class
 com/nabhaleam/quizzes/QuizQuestion.class
@@ -116,6 +118,7 @@ com/nabhaleam/learningcontent/ContentDefinition.class
 com/nabhaleam/auth/dto/PreferencesDto.class
 com/nabhaleam/assignments/AssignmentController.class
 com/nabhaleam/classes/SchoolClass$SchoolClassBuilder.class
+com/nabhaleam/contact/ContactController$ContactRequest.class
 com/nabhaleam/progress/dto/ProgressOverview.class
 com/nabhaleam/students/CurrentStudentService.class
 com/nabhaleam/assignments/dto/AssignmentSummary.class
@@ -141,6 +144,7 @@ com/nabhaleam/users/Role.class
 com/nabhaleam/seed/SeedDataLoader.class
 com/nabhaleam/auth/dto/RegisterRequest.class
 com/nabhaleam/explore/dto/ExploreDetail.class
+com/nabhaleam/contact/ContactMessage$ContactMessageBuilder.class
 com/nabhaleam/assignments/AssignmentSubmissionRepository.class
 com/nabhaleam/students/StudentProfileController.class
 com/nabhaleam/quizzes/Quiz.class
@@ -190,6 +194,7 @@ com/nabhaleam/security/CsrfHeaderFilter.class
 com/nabhaleam/learningcontent/dto/LearningContentDto.class
 com/nabhaleam/classes/SchoolClassRepository.class
 com/nabhaleam/NabhaLearnApplication.class
+com/nabhaleam/contact/ContactMessage.class
 com/nabhaleam/assignments/dto/AssignmentDetail$AttachmentDto.class
 com/nabhaleam/topics/dto/TopicDetail.class
 com/nabhaleam/quizzes/QuizService$AttemptStats.class

@@ -1148,3 +1148,23 @@ html[data-theme="dark"] .key-point span { color: #a9e9cd; }
   .review-card { padding: 13px; }
   .article-body ul li, .content-block ul li { font-size: 12px; }
 }
+
+/* Profile page polish */
+.profile-page { position: relative; overflow: hidden; }
+.profile-bg { position: absolute; inset: 0; pointer-events: none; opacity: .08; font-size: 48px; }
+.profile-bg span { position: absolute; animation: floaty 12s ease-in-out infinite; }
+.profile-bg span:nth-child(1){ top:10%; left:5%; }
+.profile-bg span:nth-child(2){ top:20%; right:8%; animation-delay:2s; }
+.profile-bg span:nth-child(3){ bottom:15%; left:12%; animation-delay:4s; }
+.profile-bg span:nth-child(4){ bottom:10%; right:15%; animation-delay:6s; }
+.profile-bg span:nth-child(5){ top:50%; left:50%; animation-delay:8s; }
+.profile-bg span:nth-child(6){ top:60%; right:30%; animation-delay:10s; }
+@keyframes floaty { 0%,100%{ transform: translateY(0) rotate(0deg);} 50%{ transform: translateY(-24px) rotate(8deg);} }
+.profile-hero { display:flex; gap:18px; align-items:center; padding:24px; }
+.profile-avatar { width:96px; height:96px; border-radius:50%; object-fit:cover; }
+.profile-avatar-lg { width:96px; height:96px; }
+.profile-meta h2 { margin:0; }
+.profile-badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.profile-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:16px; margin-top:16px; }
+.profile-upload { cursor:pointer; }
+@media (max-width: 700px) { .profile-hero { flex-direction:column; text-align:center; } }
