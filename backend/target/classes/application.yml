@@ -1,0 +1,57 @@
+server:
+  port: ${PORT:8080}
+  compression:
+    enabled: true
+    mime-types: text/html,text/css,application/javascript,application/json,image/svg+xml
+  error:
+    include-message: never
+    include-stacktrace: never
+
+spring:
+  application:
+    name: NabhaLearn
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/nabhaleam}
+      auto-index-creation: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+  jackson:
+    default-property-inclusion: non_null
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          max-age: 1h
+          cache-public: true
+
+app:
+  jwt:
+    # Leave empty for local development: a random 256-bit key is generated at startup.
+    # Always provide a stable secret in production (see backend/.env.example).
+    secret: ${JWT_SECRET:}
+    ttl: ${JWT_TTL:2h}
+  auth:
+    cookie-name: nl_token
+    secure-cookie: ${SECURE_COOKIE:false}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:8080,http://127.0.0.1:8080}
+  upload:
+    dir: ${UPLOAD_DIR:uploads}
+    max-size-bytes: 5242880
+    allowed-content-types: application/pdf,image/jpeg,image/png,image/webp
+  seed:
+    enabled: ${SEED_ENABLED:true}
+  demo:
+    email: ${DEMO_STUDENT_EMAIL:student@nabhaleam.local}
+    password: ${DEMO_STUDENT_PASSWORD:Student@12345}
+
+logging:
+  level:
+    root: INFO
+    com.nabhaleam: INFO
+    org.springframework.data.mongodb.core.MongoTemplate: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
