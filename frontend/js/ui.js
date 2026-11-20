@@ -385,7 +385,7 @@ export function toggleTheme() {
   return applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
 }
 
-export function bindThemeToggles(root = document) {
+export function bindThemeToggles(root = document, onChange = null) {
   root.querySelectorAll('[data-theme-toggle]').forEach((button) => {
     button.innerHTML = icon(currentTheme() === 'dark' ? 'sun' : 'moon', 18);
     button.setAttribute('aria-label', currentTheme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
@@ -393,6 +393,9 @@ export function bindThemeToggles(root = document) {
       const next = toggleTheme();
       button.innerHTML = icon(next === 'dark' ? 'sun' : 'moon', 18);
       button.setAttribute('aria-label', next === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+      if (typeof onChange === 'function') {
+        try { onChange(next); } catch (error) { console.warn('Theme change handler failed:', error); }
+      }
     });
   });
 }

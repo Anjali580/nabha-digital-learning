@@ -1,4 +1,9 @@
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/NabhaLearnApplication.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/admin/AdminController.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/admin/AdminService.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/admin/dto/AdminDashboardDto.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/admin/dto/AdminUserDto.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/admin/dto/AdminUserStatusRequest.java
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/assignments/Assignment.java
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/assignments/AssignmentController.java
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/assignments/AssignmentReminderJob.java
@@ -133,6 +138,16 @@
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/subjects/SubjectService.java
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/subjects/dto/SubjectDetail.java
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/subjects/dto/SubjectDto.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/teacher/CurrentTeacherService.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/teacher/TeacherController.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/teacher/TeacherProfileController.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/teacher/TeacherService.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/teacher/dto/CreateAssignmentRequest.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/teacher/dto/ReviewSubmissionRequest.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/teacher/dto/TeacherAssignmentDetail.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/teacher/dto/TeacherAssignmentRow.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/teacher/dto/TeacherDashboardResponse.java
+/Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/teacher/dto/TeacherSubmissionRow.java
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/topics/Topic.java
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/topics/TopicController.java
 /Users/aniketkelwa/Documents/GitHub/nabha-digital-learning/backend/src/main/java/com/nabhaleam/topics/TopicRepository.java

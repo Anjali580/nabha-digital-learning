@@ -108,6 +108,7 @@ body {
 
 img, svg, video, canvas { display: block; max-width: 100%; }
 img { height: auto; }
+[hidden] { display: none !important; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; }
 a { color: var(--brand-strong); text-decoration: none; }
@@ -256,7 +257,7 @@ p { color: var(--text); }
 .btn .spinner { width: 18px; height: 18px; border-width: 2px; }
 
 /* ------------------------------------------------------------------ forms */
-.field { display: grid; gap: 7px; margin-bottom: 16px; }
+.field { display: grid; gap: 7px; margin-bottom: 16px; align-content: start; }
 .field > label, .field-label {
   font-size: 13.5px;
   font-weight: 700;

@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +23,8 @@ public interface QuizAttemptRepository extends MongoRepository<QuizAttempt, Stri
             String studentId, String quizId, AttemptStatus status);
 
     long countByStudentIdAndStatus(String studentId, AttemptStatus status);
+
+    List<QuizAttempt> findByStudentIdIn(Collection<String> studentIds);
 
     void deleteByStudentId(String studentId);
 }

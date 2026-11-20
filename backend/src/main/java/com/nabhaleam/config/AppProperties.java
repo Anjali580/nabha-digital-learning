@@ -60,5 +60,11 @@ public class AppProperties {
     public static class Demo {
         private String email = "student@nabhaleam.local";
         private String password = "Student@12345";
+        private String teacherEmail = "teacher@nabhaleam.local";
+        private String teacherPassword = "Teacher@12345";
+        private String teacherDegree = "M.Sc., B.Ed.";
+        private String adminEmail = "admin@nabhaleam.local";
+        private String adminPassword = "Admin@12345";
+        private String adminInviteCode = "NABHA-ADMIN";
     }
 }

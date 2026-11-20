@@ -18,5 +18,7 @@ public interface AssignmentSubmissionRepository extends MongoRepository<Assignme
 
     long countByStudentIdAndStatusIn(String studentId, Collection<SubmissionStatus> statuses);
 
+    long countByStatusIn(Collection<SubmissionStatus> statuses);
+
     boolean existsByAssignmentIdAndStudentId(String assignmentId, String studentId);
 }

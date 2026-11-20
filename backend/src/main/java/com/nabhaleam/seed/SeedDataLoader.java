@@ -76,6 +76,8 @@ public class SeedDataLoader implements ApplicationRunner {
                 log.info("Seed version {} already applied", seed.getVersion());
             }
             User demo = ensureDemoStudent();
+            ensureDemoTeacher();
+            ensureDemoAdmin();
             seedDemoNotifications(demo, seed);
         } catch (Exception ex) {
             log.error("Could not load seed data", ex);
@@ -195,6 +197,67 @@ public class SeedDataLoader implements ApplicationRunner {
                 "This demo account starts with real, empty progress. Learn a topic, take a quiz and watch your dashboard update.",
                 "/app/dashboard", "welcome:" + user.getId());
         log.info("Created demo student account {}", demo.getEmail());
+        return user;
+    }
+
+    private User ensureDemoTeacher() {
+        AppProperties.Demo demo = properties.getDemo();
+        User existing = userRepository.findByEmailIgnoreCase(demo.getTeacherEmail()).orElse(null);
+        if (existing != null) {
+            return existing;
+        }
+        User user = userRepository.save(User.builder()
+                .email(demo.getTeacherEmail().toLowerCase())
+                .fullName("Demo Teacher")
+                .passwordHash(passwordEncoder.encode(demo.getTeacherPassword()))
+                .role(Role.TEACHER)
+                .active(true)
+                .schoolName("NabhaLearn Demo School")
+                .degree(demo.getTeacherDegree())
+                .preferredLanguage("en")
+                .demo(true)
+                .build());
+        preferencesRepository.save(StudentPreferences.builder()
+                .studentId(user.getId())
+                .language("en")
+                .theme("light")
+                .emailNotifications(true)
+                .assignmentReminders(true)
+                .dailyGoalTopics(2)
+                .build());
+        log.info("Created demo teacher account {}", demo.getTeacherEmail());
+        return user;
+    }
+
+    private User ensureDemoAdmin() {
+        AppProperties.Demo demo = properties.getDemo();
+        User existing = userRepository.findByEmailIgnoreCase(demo.getAdminEmail()).orElse(null);
+        if (existing != null) {
+            return existing;
+        }
+        User user = userRepository.save(User.builder()
+                .email(demo.getAdminEmail().toLowerCase())
+                .fullName("Demo Admin")
+                .passwordHash(passwordEncoder.encode(demo.getAdminPassword()))
+                .role(Role.ADMIN)
+                .active(true)
+                .schoolName("NabhaLearn Demo School")
+                .preferredLanguage("en")
+                .demo(true)
+                .build());
+        preferencesRepository.save(StudentPreferences.builder()
+                .studentId(user.getId())
+                .language("en")
+                .theme("light")
+                .emailNotifications(true)
+                .assignmentReminders(true)
+                .dailyGoalTopics(2)
+                .build());
+        notificationService.notify(user.getId(), NotificationType.WELCOME,
+                "Welcome to NabhaLearn, Demo!",
+                "Your administrator workspace is ready. Manage accounts and keep an eye on every class.",
+                "/app/admin/dashboard", "welcome:" + user.getId());
+        log.info("Created demo admin account {}", demo.getAdminEmail());
         return user;
     }
 

@@ -24,8 +24,7 @@ spring:
     resources:
       cache:
         cachecontrol:
-          max-age: 1h
-          cache-public: true
+          no-store: true
 
 app:
   jwt:
@@ -47,6 +46,12 @@ app:
   demo:
     email: ${DEMO_STUDENT_EMAIL:student@nabhaleam.local}
     password: ${DEMO_STUDENT_PASSWORD:Student@12345}
+    teacher-email: ${DEMO_TEACHER_EMAIL:teacher@nabhaleam.local}
+    teacher-password: ${DEMO_TEACHER_PASSWORD:Teacher@12345}
+    teacher-degree: ${DEMO_TEACHER_DEGREE:M.Sc., B.Ed.}
+    admin-email: ${DEMO_ADMIN_EMAIL:admin@nabhaleam.local}
+    admin-password: ${DEMO_ADMIN_PASSWORD:Admin@12345}
+    admin-invite-code: ${ADMIN_INVITE_CODE:NABHA-ADMIN}
 
 logging:
   level:

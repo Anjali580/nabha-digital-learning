@@ -53,11 +53,20 @@ public class StudentProfileService {
                     .ifPresent(other -> errors.put("email", "Another account already uses this email address."));
         }
 
-        SchoolClass schoolClass = classRepository.findById(request.classId())
-                .filter(SchoolClass::isActive)
-                .orElse(null);
-        if (schoolClass == null) {
-            errors.put("classId", "Please choose a valid class.");
+        boolean teacher = student.getRole() == Role.TEACHER;
+        boolean staff = teacher || student.getRole() == Role.ADMIN;
+        SchoolClass schoolClass = null;
+        if (teacher) {
+            if (request.degree() == null || request.degree().isBlank()) {
+                errors.put("degree", "Please add your teaching degree or qualification.");
+            }
+        } else if (!staff) {
+            schoolClass = classRepository.findById(request.classId() == null ? "" : request.classId())
+                    .filter(SchoolClass::isActive)
+                    .orElse(null);
+            if (schoolClass == null) {
+                errors.put("classId", "Please choose a valid class.");
+            }
         }
         if (!errors.isEmpty()) {
             throw ApiException.validation(errors);
@@ -65,8 +74,16 @@ public class StudentProfileService {
 
         student.setFullName(request.fullName().trim());
         student.setEmail(email);
-        student.setClassId(schoolClass.getId());
-        student.setClassName(schoolClass.getName());
+        if (staff) {
+            student.setClassId(null);
+            student.setClassName(null);
+            if (request.degree() != null) {
+                student.setDegree(request.degree().isBlank() ? null : request.degree().trim());
+            }
+        } else {
+            student.setClassId(schoolClass.getId());
+            student.setClassName(schoolClass.getName());
+        }
         student.setSchoolName(request.schoolName() == null || request.schoolName().isBlank()
                 ? null : request.schoolName().trim());
         if (request.preferredLanguage() != null) {

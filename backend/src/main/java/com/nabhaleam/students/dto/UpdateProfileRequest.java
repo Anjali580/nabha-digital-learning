@@ -15,8 +15,10 @@ public record UpdateProfileRequest(
         @Size(max = 160, message = "Email is too long.")
         String email,
 
-        @NotBlank(message = "Please select your class.")
         String classId,
+
+        @Size(max = 120, message = "Degree is too long.")
+        String degree,
 
         @Size(max = 120, message = "School name is too long.")
         String schoolName,

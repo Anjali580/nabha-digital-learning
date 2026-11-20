@@ -1,0 +1,8 @@
+{
+  "liveServer.settings.file": "index.html",
+  "liveServer.settings.proxy": {
+    "enable": true,
+    "baseUri": "/api",
+    "proxyUri": "http://127.0.0.1:8080/api"
+  }
+}

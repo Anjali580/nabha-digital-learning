@@ -4,6 +4,7 @@ import com.nabhaleam.auth.dto.*;
 import com.nabhaleam.classes.SchoolClass;
 import com.nabhaleam.classes.SchoolClassRepository;
 import com.nabhaleam.common.ApiException;
+import com.nabhaleam.config.AppProperties;
 import com.nabhaleam.notifications.NotificationService;
 import com.nabhaleam.notifications.NotificationType;
 import com.nabhaleam.security.JwtService;
@@ -30,10 +31,14 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final NotificationService notificationService;
+    private final AppProperties properties;
 
     public AuthResult register(RegisterRequest request) {
         Map<String, String> errors = new LinkedHashMap<>();
         String email = request.email().trim().toLowerCase(Locale.ROOT);
+        Role role = parseRole(request.role());
+        boolean admin = role == Role.ADMIN;
+        boolean teacher = role == Role.TEACHER;
 
         if (!request.password().equals(request.confirmPassword())) {
             errors.put("confirmPassword", "Passwords do not match.");
@@ -44,12 +49,27 @@ public class AuthService {
         if (users.existsByEmailIgnoreCase(email)) {
             errors.put("email", "An account with this email already exists.");
         }
-        SchoolClass schoolClass = classRepository.findById(request.classId())
-                .filter(SchoolClass::isActive)
-                .orElse(null);
-        if (schoolClass == null) {
-            errors.put("classId", "Please choose a valid class.");
+
+        SchoolClass schoolClass = null;
+        if (role == Role.STUDENT) {
+            schoolClass = classRepository.findById(request.classId() == null ? "" : request.classId())
+                    .filter(SchoolClass::isActive)
+                    .orElse(null);
+            if (schoolClass == null) {
+                errors.put("classId", "Please choose a valid class.");
+            }
+        } else if (teacher) {
+            if (request.degree() == null || request.degree().isBlank()) {
+                errors.put("degree", "Please add your teaching degree or qualification.");
+            }
+        } else if (admin) {
+            String expected = properties.getDemo().getAdminInviteCode();
+            if (expected != null && !expected.isBlank()
+                    && (request.adminCode() == null || !request.adminCode().trim().equalsIgnoreCase(expected))) {
+                errors.put("adminCode", "Enter the admin invite code from your school office.");
+            }
         }
+
         if (!errors.isEmpty()) {
             throw ApiException.validation(errors);
         }
@@ -59,11 +79,12 @@ public class AuthService {
                 .email(email)
                 .fullName(request.fullName().trim())
                 .passwordHash(passwordEncoder.encode(request.password()))
-                .role(Role.STUDENT)
+                .role(role)
                 .active(true)
                 .schoolName(blankToNull(request.schoolName()))
-                .classId(schoolClass.getId())
-                .className(schoolClass.getName())
+                .classId(schoolClass == null ? null : schoolClass.getId())
+                .className(schoolClass == null ? null : schoolClass.getName())
+                .degree(teacher ? request.degree().trim() : null)
                 .preferredLanguage(language)
                 .demo(false)
                 .build();
@@ -78,13 +99,36 @@ public class AuthService {
                 .dailyGoalTopics(2)
                 .build());
 
-        notificationService.notify(user.getId(), NotificationType.WELCOME,
-                "Welcome to NabhaLearn, " + firstName(user.getFullName()) + "!",
-                "Start with a subject in Learn, then explore something new beyond your textbook.",
-                "/app/learn", "welcome:" + user.getId());
-
-        log.info("Registered new student {}", user.getId());
+        notifyWelcome(user);
+        log.info("Registered new {} {}", role.name().toLowerCase(Locale.ROOT), user.getId());
         return new AuthResult(UserSummary.from(user), jwtService.generateToken(user.getId(), user.getRole().name()));
+    }
+
+    private Role parseRole(String value) {
+        if (value == null) return Role.STUDENT;
+        try {
+            return Role.valueOf(value.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            return Role.STUDENT;
+        }
+    }
+
+    private void notifyWelcome(User user) {
+        String name = firstName(user.getFullName());
+        switch (user.getRole()) {
+            case TEACHER -> notificationService.notify(user.getId(), NotificationType.WELCOME,
+                    "Welcome to NabhaLearn, " + name + "!",
+                    "Your teacher workspace is ready. Review classes, create assignments and follow student progress.",
+                    "/app/teacher/dashboard", "welcome:" + user.getId());
+            case ADMIN -> notificationService.notify(user.getId(), NotificationType.WELCOME,
+                    "Welcome to NabhaLearn, " + name + "!",
+                    "Your administrator workspace is ready. Manage school accounts, classes and teacher tools.",
+                    "/app/admin/dashboard", "welcome:" + user.getId());
+            default -> notificationService.notify(user.getId(), NotificationType.WELCOME,
+                    "Welcome to NabhaLearn, " + name + "!",
+                    "Start with a subject in Learn, then explore something new beyond your textbook.",
+                    "/app/learn", "welcome:" + user.getId());
+        }
     }
 
     public AuthResult login(LoginRequest request) {

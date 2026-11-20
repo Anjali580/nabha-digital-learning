@@ -40,6 +40,9 @@ public class User {
 
     private String className;
 
+    /** Teacher qualification, for example "M.Sc., B.Ed." */
+    private String degree;
+
     private String preferredLanguage;
 
     private String avatarFileId;

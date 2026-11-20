@@ -22,8 +22,17 @@ public record RegisterRequest(
         @NotBlank(message = "Please confirm your password.")
         String confirmPassword,
 
-        @NotBlank(message = "Please select your class.")
+        @Pattern(regexp = "STUDENT|TEACHER|ADMIN", message = "Choose a student, teacher or admin account.")
+        String role,
+
         String classId,
+
+        @Size(max = 120, message = "Degree is too long.")
+        String degree,
+
+        /** Required only when creating an administrator account. */
+        @Size(max = 80, message = "Admin invite code is too long.")
+        String adminCode,
 
         @Size(max = 120, message = "School name is too long.")
         String schoolName,

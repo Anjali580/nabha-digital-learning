@@ -1,9 +1,29 @@
 import { api } from '../api.js';
 import { auth } from '../auth.js';
 import { icon } from '../icons.js';
+import { homeForRole, isAdmin, isStaff } from '../roles.js';
 import { avatar, bindThemeToggles, esc, progressBar } from '../ui.js';
 
 function e(value) { return esc(value); }
+
+/**
+ * Persist theme changes made with the header/shell toggle so a reload does not
+ * snap back to the theme stored in the account preferences.
+ */
+function persistThemePreference(theme) {
+  if (!auth.getUser()) return;
+  const preferences = auth.getPreferences() || {};
+  const base = isTeacher(auth.getUser()) ? '/api/teacher' : '/api/student';
+  api.put(`${base}/preferences`, {
+    language: preferences.language || 'en',
+    theme,
+    emailNotifications: Boolean(preferences.emailNotifications),
+    assignmentReminders: Boolean(preferences.assignmentReminders),
+    dailyGoalTopics: preferences.dailyGoalTopics || 2
+  }).then(({ data }) => {
+    if (data) auth.setPreferences(data);
+  }).catch(() => { /* the theme is still applied locally */ });
+}
 
 export function brandLockup({ href = '/', compact = false } = {}) {
   return `<a class="brand" href="${href}" aria-label="NabhaLearn home">
@@ -117,11 +137,11 @@ export function mountPublicLayout(root, { signal } = {}) {
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true, signal });
   }
-  bindThemeToggles(root);
+  bindThemeToggles(root, persistThemePreference);
 }
 
 /* ------------------------------------------------------------------- panel */
-const SIDE_SECTIONS = [
+const STUDENT_SIDE_SECTIONS = [
   {
     label: 'Learning',
     items: [
@@ -150,7 +170,43 @@ const SIDE_SECTIONS = [
   }
 ];
 
-const BOTTOM_NAV = [
+const TEACHER_SIDE_SECTIONS = [
+  {
+    label: 'Workspace',
+    items: [
+      { href: '/app/teacher/dashboard', label: 'Overview', icon: 'dashboard' },
+      { href: '/app/teacher/students', label: 'Students', icon: 'users' },
+      { href: '/app/teacher/assignments', label: 'Assignments', icon: 'assignment', badge: 'reviews' }
+    ]
+  },
+  {
+    label: 'Account',
+    items: [
+      { href: '/app/profile', label: 'Profile', icon: 'user' },
+      { href: '/app/settings', label: 'Settings', icon: 'settings' }
+    ]
+  }
+];
+
+const ADMIN_SIDE_SECTIONS = [
+  {
+    label: 'Administration',
+    items: [
+      { href: '/app/admin/dashboard', label: 'Overview', icon: 'dashboard' },
+      { href: '/app/admin/users', label: 'People', icon: 'users' },
+      { href: '/app/teacher/dashboard', label: 'Teacher workspace', icon: 'school' }
+    ]
+  },
+  {
+    label: 'Account',
+    items: [
+      { href: '/app/profile', label: 'Profile', icon: 'user' },
+      { href: '/app/settings', label: 'Settings', icon: 'settings' }
+    ]
+  }
+];
+
+const STUDENT_BOTTOM_NAV = [
   { href: '/app/dashboard', label: 'Home', icon: 'dashboard' },
   { href: '/app/learn', label: 'Learn', icon: 'book-open' },
   { href: '/app/explore', label: 'Explore', icon: 'compass' },
@@ -158,20 +214,47 @@ const BOTTOM_NAV = [
   { href: '/app/progress', label: 'Progress', icon: 'chart' }
 ];
 
-let shellStats = { unread: 0, dailyGoal: 2, todayCompleted: 0, loaded: false };
+const TEACHER_BOTTOM_NAV = [
+  { href: '/app/teacher/dashboard', label: 'Overview', icon: 'dashboard' },
+  { href: '/app/teacher/students', label: 'Students', icon: 'users' },
+  { href: '/app/teacher/assignments', label: 'Tasks', icon: 'assignment' },
+  { href: '/app/profile', label: 'Profile', icon: 'user' }
+];
+
+const ADMIN_BOTTOM_NAV = [
+  { href: '/app/admin/dashboard', label: 'Overview', icon: 'dashboard' },
+  { href: '/app/admin/users', label: 'People', icon: 'users' },
+  { href: '/app/teacher/dashboard', label: 'Teaching', icon: 'school' },
+  { href: '/app/profile', label: 'Profile', icon: 'user' }
+];
+
+let shellStats = {
+  unread: 0, dailyGoal: 2, todayCompleted: 0, pending: 0, totalStudents: 0, totalTeachers: 0, totalClasses: 0, loaded: false
+};
+
+function isTeacher(user = auth.getUser()) {
+  return isStaff(user);
+}
 
 function isActive(path, href) {
-  if (href === '/app/dashboard') return path === href;
+  if (href === '/app/dashboard' || href === '/app/teacher/dashboard' || href === '/app/admin/dashboard') return path === href;
   return path === href || path.startsWith(`${href}/`);
 }
 
-function navMarkup(path) {
-  return SIDE_SECTIONS.map((section) => `
+function navMarkup(path, user) {
+  const sections = isAdmin(user)
+    ? ADMIN_SIDE_SECTIONS
+    : isTeacher(user) ? TEACHER_SIDE_SECTIONS : STUDENT_SIDE_SECTIONS;
+  return sections.map((section) => `
     <p class="side-label">${section.label}</p>
     ${section.items.map((item) => {
       const active = isActive(path, item.href);
-      const count = item.badge === 'unread' && shellStats.unread > 0
-        ? `<span class="side-count" data-unread-count>${shellStats.unread}</span>` : '';
+      let count = '';
+      if (item.badge === 'unread' && shellStats.unread > 0) {
+        count = `<span class="side-count" data-unread-count>${shellStats.unread}</span>`;
+      } else if (item.badge === 'reviews' && shellStats.pending > 0) {
+        count = `<span class="side-count" data-review-count>${shellStats.pending}</span>`;
+      }
       return `<a class="side-link ${active ? 'active' : ''}" href="${item.href}" ${active ? 'aria-current="page"' : ''}>
         ${icon(item.icon, 18)}<span>${item.label}</span>${count}
       </a>`;
@@ -180,55 +263,79 @@ function navMarkup(path) {
 }
 
 function sidebarMarkup(user, path) {
+  const admin = isAdmin(user);
+  const teacher = isTeacher(user);
+  const staff = admin || teacher;
   const goal = shellStats.dailyGoal || 2;
   const done = Math.min(shellStats.todayCompleted || 0, goal);
   const goalPct = goal ? Math.round((done / goal) * 100) : 0;
-  return `<aside class="sidebar" id="app-sidebar" aria-label="Student menu">
+  const home = homeForRole(user);
+  const workspaceLabel = admin ? 'Admin' : teacher ? 'Teacher' : 'Student';
+  const subtitle = admin
+    ? (user?.schoolName || 'School administrator')
+    : teacher ? (user?.degree || 'Teacher') : (user?.className || 'Student');
+  const badgeClass = admin ? 'blue' : teacher ? 'violet' : 'green';
+  return `<aside class="sidebar" id="app-sidebar" aria-label="${workspaceLabel} menu">
     <div class="sidebar-head">
-      ${brandLockup({ href: '/app/dashboard' })}
+      ${brandLockup({ href: home })}
       <button class="sidebar-close" type="button" data-sidebar-close aria-label="Close menu">${icon('close', 19)}</button>
     </div>
-    <div class="student-mini">
+    <div class="student-mini ${staff ? 'teacher-mini' : ''}">
       ${avatar(user, 'sm')}
       <div>
-        <strong>${e(user?.fullName || 'Student')}</strong>
-        <span>${e(user?.className || 'Student')}</span>
+        <strong>${e(user?.fullName || workspaceLabel)}</strong>
+        <span>${e(subtitle)}</span>
       </div>
-      ${user?.demo ? '<span class="badge amber">Demo</span>' : '<span class="badge green">Student</span>'}
+      ${user?.demo ? '<span class="badge amber">Demo</span>' : `<span class="badge ${badgeClass}">${workspaceLabel}</span>`}
     </div>
-    <nav class="side-nav" aria-label="Student panel">${navMarkup(path)}</nav>
+    <nav class="side-nav" aria-label="${workspaceLabel} panel">${navMarkup(path, user)}</nav>
     <div class="sidebar-foot">
-      <div class="sidebar-goal">
-        <div class="row"><strong>Today’s goal</strong><span>${done}/${goal} topics</span></div>
-        ${progressBar(goalPct)}
-        <small>${done >= goal ? 'Goal reached — well done!' : 'One small lesson at a time.'}</small>
-      </div>
-      ${user?.demo ? `<div class="sidebar-demo">${icon('info', 14)}<span>This is a demo account. Your progress starts empty and is saved to this demo student.</span></div>` : ''}
+      ${admin ? `<div class="sidebar-goal admin-summary">
+        <div class="row"><strong>School overview</strong><span data-admin-students>${shellStats.totalStudents || 0} students</span></div>
+        <div data-admin-progress>${progressBar(100)}</div>
+        <small data-admin-summary>${shellStats.totalTeachers || 0} teachers · ${shellStats.totalClasses || 0} classes</small>
+      </div>` : teacher ? `<div class="sidebar-goal teacher-summary">
+        <div class="row"><strong>Teaching overview</strong><span data-teacher-students>${shellStats.totalStudents || 0} students</span></div>
+        <div data-teacher-progress>${progressBar(shellStats.pending > 0 ? 100 : 0, 'amber')}</div>
+        <small data-teacher-summary>${shellStats.pending > 0
+          ? `${shellStats.pending} submission${shellStats.pending === 1 ? '' : 's'} waiting for review.`
+          : 'All caught up. New submissions will appear here.'}</small>
+      </div>` : `<div class="sidebar-goal">
+        <div class="row"><strong>Today’s goal</strong><span data-goal-count>${done}/${goal} topics</span></div>
+        <div data-goal-progress>${progressBar(goalPct)}</div>
+        <small data-goal-text>${done >= goal ? 'Goal reached — well done!' : 'One small lesson at a time.'}</small>
+      </div>`}
+      ${user?.demo ? `<div class="sidebar-demo">${icon('info', 14)}<span>This is a demo account. ${admin
+        ? 'Account and class changes are saved to this demo school.'
+        : teacher ? 'New assignments and reviews are saved to this demo teacher.'
+        : 'Your progress starts empty and is saved to this demo student.'}</span></div>` : ''}
       <button class="side-signout" type="button" data-logout>${icon('logout', 17)}<span>Sign out</span></button>
     </div>
   </aside>`;
 }
 
 function topbarMarkup(user, route) {
+  const teacher = isTeacher(user);
+  const admin = isAdmin(user);
   return `<header class="topbar">
     <div class="topbar-left">
       <button class="mobile-menu" type="button" data-sidebar-open aria-label="Open menu">${icon('menu', 20)}</button>
       <div class="topbar-crumb">
-        <span>Student</span>${icon('chevron-right', 13)}<strong>${e(route.title || 'Dashboard')}</strong>
+        <span>${admin ? 'Admin' : teacher ? 'Teacher' : 'Student'}</span>${icon('chevron-right', 13)}<strong>${e(route.title || 'Dashboard')}</strong>
       </div>
     </div>
     <div class="topbar-right">
-      <form class="topbar-search" role="search" data-global-search>
+      ${teacher ? '' : `<form class="topbar-search" role="search" data-global-search>
         <label class="sr-only" for="topbar-search-input">Search lessons, subjects and explore articles</label>
         ${icon('search', 16)}
         <input id="topbar-search-input" name="q" type="search" placeholder="Search lessons, quizzes…" autocomplete="off">
         <kbd>/</kbd>
-      </form>
+      </form>`}
       <button class="topbar-icon" type="button" data-theme-toggle aria-label="Switch theme"></button>
-      <a class="topbar-icon" href="/app/notifications" aria-label="Notifications" style="position:relative">
+      ${teacher ? '' : `<a class="topbar-icon" href="/app/notifications" aria-label="Notifications" style="position:relative">
         ${icon('bell', 18)}
         <span class="dot ${shellStats.unread ? '' : 'hide'}" data-notif-dot></span>
-      </a>
+      </a>`}
       <a class="topbar-profile" href="/app/profile" aria-label="Your profile">
         ${avatar(user, 'sm')}
         ${icon('chevron-down', 13)}
@@ -237,11 +344,15 @@ function topbarMarkup(user, route) {
   </header>`;
 }
 
-function bottomNavMarkup(path) {
+function bottomNavMarkup(path, user) {
+  const nav = isAdmin(user)
+    ? ADMIN_BOTTOM_NAV
+    : isTeacher(user) ? TEACHER_BOTTOM_NAV : STUDENT_BOTTOM_NAV;
   return `<nav class="bottom-nav" aria-label="Quick navigation">
-    ${BOTTOM_NAV.map((item) => {
+    ${nav.map((item) => {
       const active = isActive(path, item.href);
-      const dot = item.href === '/app/assignments' && shellStats.pending > 0 ? '<span class="dot"></span>' : '';
+      const dot = !isTeacher(user) && item.href === '/app/assignments' && shellStats.pending > 0
+        ? '<span class="dot"></span>' : '';
       return `<a class="bottom-link ${active ? 'active' : ''}" href="${item.href}" ${active ? 'aria-current="page"' : ''}>
         ${icon(item.icon, 19)}<span>${item.label}</span>${dot}
       </a>`;
@@ -257,7 +368,7 @@ export function renderAppLayout({ content, route, path }) {
       ${topbarMarkup(user, route)}
       <main id="main" class="app-content">${content}</main>
     </div>
-    ${bottomNavMarkup(path)}
+    ${bottomNavMarkup(path, user)}
   </div>`;
 }
 
@@ -287,7 +398,7 @@ export function mountAppLayout(root, { signal } = {}) {
     if (event.key === 'Escape') close();
   }, { signal });
 
-  bindThemeToggles(root);
+  bindThemeToggles(root, persistThemePreference);
 
   root.querySelector('[data-logout]')?.addEventListener('click', async () => {
     await auth.logout();
@@ -335,6 +446,15 @@ export function setShellStats(stats = {}) {
   }
   const dot = document.querySelector('[data-notif-dot]');
   if (dot) dot.classList.toggle('hide', !shellStats.unread);
+  const reviewCount = document.querySelector('[data-review-count]');
+  if (reviewCount) {
+    if (shellStats.pending > 0) {
+      reviewCount.textContent = shellStats.pending > 9 ? '9+' : String(shellStats.pending);
+      reviewCount.classList.remove('hide');
+    } else {
+      reviewCount.remove();
+    }
+  }
   const pendingDots = document.querySelectorAll('.bottom-link .dot');
   pendingDots.forEach((node) => node.remove());
   if (shellStats.pending > 0) {
@@ -345,18 +465,64 @@ export function setShellStats(stats = {}) {
       tasks.appendChild(span);
     }
   }
+
+  const setText = (selector, value) => {
+    const node = document.querySelector(selector);
+    if (node) node.textContent = value;
+  };
+  const setBar = (selector, value) => {
+    const node = document.querySelector(`${selector} .progress-track > span`);
+    if (node) node.style.width = `${Math.max(0, Math.min(100, value))}%`;
+  };
+
+  if (isAdmin(auth.getUser())) {
+    const students = shellStats.totalStudents || 0;
+    setText('[data-admin-students]', `${students} student${students === 1 ? '' : 's'}`);
+    setText('[data-admin-summary]', `${shellStats.totalTeachers || 0} teacher${shellStats.totalTeachers === 1 ? '' : 's'} · ${shellStats.totalClasses || 0} classes`);
+  } else if (isTeacher(auth.getUser())) {
+    const count = shellStats.totalStudents || 0;
+    setText('[data-teacher-students]', `${count} student${count === 1 ? '' : 's'}`);
+    setBar('[data-teacher-progress]', shellStats.pending > 0 ? 100 : 0);
+    setText('[data-teacher-summary]', shellStats.pending > 0
+      ? `${shellStats.pending} submission${shellStats.pending === 1 ? '' : 's'} waiting for review.`
+      : 'All caught up. New submissions will appear here.');
+  } else {
+    const goal = shellStats.dailyGoal || 2;
+    const done = Math.min(shellStats.todayCompleted || 0, goal);
+    setText('[data-goal-count]', `${done}/${goal} topics`);
+    setBar('[data-goal-progress]', goal ? Math.round((done / goal) * 100) : 0);
+    setText('[data-goal-text]', done >= goal ? 'Goal reached — well done!' : 'One small lesson at a time.');
+  }
 }
 
 export async function refreshShellStats() {
   if (!auth.isAuthenticated()) return shellStats;
   try {
-    const { data } = await api.get('/api/student/dashboard');
-    setShellStats({
-      unread: data?.unreadNotifications || 0,
-      dailyGoal: data?.overview?.dailyGoalTopics || 2,
-      todayCompleted: data?.overview?.todayCompletedTopics || 0,
-      pending: data?.overview?.assignmentsPending || 0
-    });
+    if (isAdmin(auth.getUser())) {
+      const { data } = await api.get('/api/admin/dashboard');
+      setShellStats({
+        unread: 0,
+        pending: data?.pendingReviews || 0,
+        totalStudents: data?.totalStudents || 0,
+        totalTeachers: data?.totalTeachers || 0,
+        totalClasses: data?.totalClasses || 0
+      });
+    } else if (isTeacher(auth.getUser())) {
+      const { data } = await api.get('/api/teacher/dashboard');
+      setShellStats({
+        unread: data?.unreadNotifications || 0,
+        pending: data?.pendingReviews || 0,
+        totalStudents: data?.totalStudents || 0
+      });
+    } else {
+      const { data } = await api.get('/api/student/dashboard');
+      setShellStats({
+        unread: data?.unreadNotifications || 0,
+        dailyGoal: data?.overview?.dailyGoalTopics || 2,
+        todayCompleted: data?.overview?.todayCompletedTopics || 0,
+        pending: data?.overview?.assignmentsPending || 0
+      });
+    }
   } catch (error) {
     if (error?.status !== 401) console.warn('Sidebar stats unavailable:', error.message);
   }
