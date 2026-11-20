@@ -1,0 +1,38 @@
+# Render Blueprint for the split frontend + backend deployment.
+#
+# If the two services were created manually in the Render dashboard, connect
+# this Blueprint (or copy these settings) so the SPA rewrite and CORS origin
+# are applied automatically. Render preserves any environment variables that
+# are not listed here, including MONGODB_URI and JWT_SECRET.
+
+# Match these names to your existing Render services before syncing. The
+# dashboard name may omit the random suffix that appears in the public URL
+# (for example, service "nabha-digital-learning" -> ...-q5z8.onrender.com).
+services:
+  - type: web
+    name: nabha-digital-learning-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: CORS_ORIGINS
+        value: https://nabha-digital-learning-q5z8.onrender.com,https://nabha-digital-learning-backend.onrender.com
+      - key: SECURE_COOKIE
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+
+  - type: web
+    name: nabha-digital-learning
+    runtime: static
+    buildCommand: echo "No build step required"
+    staticPublishPath: ./frontend
+    autoDeployTrigger: commit
+    routes:
+      # Client-side routes such as /login and /app/dashboard are served by the
+      # SPA shell instead of returning 404.
+      - type: rewrite
+        source: /*
+        destination: /index.html

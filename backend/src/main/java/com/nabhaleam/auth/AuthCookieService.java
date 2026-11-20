@@ -1,6 +1,7 @@
 package com.nabhaleam.auth;
 
 import com.nabhaleam.config.AppProperties;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
@@ -15,21 +16,38 @@ public class AuthCookieService {
         this.properties = properties;
     }
 
-    public ResponseCookie create(String token) {
-        return base(token, properties.getJwt().getTtl());
+    public ResponseCookie create(String token, HttpServletRequest request) {
+        return base(token, properties.getJwt().getTtl(), request);
     }
 
-    public ResponseCookie clear() {
-        return base("", Duration.ZERO);
+    public ResponseCookie clear(HttpServletRequest request) {
+        return base("", Duration.ZERO, request);
     }
 
-    private ResponseCookie base(String value, Duration maxAge) {
+    private ResponseCookie base(String value, Duration maxAge, HttpServletRequest request) {
+        boolean secure = properties.getAuth().isSecureCookie() || isSecureRequest(request);
+
+        // Cross-site XHR (frontend on one onrender.com subdomain, backend on
+        // another) only sends the cookie when it is SameSite=None; Secure.
+        // Same-site/local development can keep the stricter Lax default.
+        String sameSite = secure ? "None" : "Lax";
+
         return ResponseCookie.from(properties.getAuth().getCookieName(), value)
                 .httpOnly(true)
-                .secure(properties.getAuth().isSecureCookie())
-                .sameSite("Strict")
+                .secure(secure)
+                .sameSite(sameSite)
                 .path("/")
                 .maxAge(maxAge)
                 .build();
+    }
+
+    private boolean isSecureRequest(HttpServletRequest request) {
+        if (request == null) return false;
+        if (request.isSecure()) return true;
+        String forwardedProto = request.getHeader("X-Forwarded-Proto");
+        if (forwardedProto == null) return false;
+        // Proxies may append additional values: "https,http".
+        String first = forwardedProto.split(",")[0].trim();
+        return "https".equalsIgnoreCase(first);
     }
 }

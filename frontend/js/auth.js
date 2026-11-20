@@ -1,4 +1,5 @@
 import { api, setUnauthorizedHandler } from './api.js';
+import { clearAuthToken, setAuthToken } from './token.js';
 import { applyTheme } from './ui.js';
 
 const listeners = new Set();
@@ -75,6 +76,7 @@ export async function loadSession({ force = false } = {}) {
 
 export async function login(email, password) {
   const { data, message } = await api.post('/api/auth/login', { email, password });
+  if (data?.token) setAuthToken(data.token);
   state.user = data?.user || null;
   const me = await api.get('/api/auth/me', { silentAuth: true }).catch(() => null);
   if (me?.data) {
@@ -89,6 +91,7 @@ export async function login(email, password) {
 
 export async function register(payload) {
   const { data, message } = await api.post('/api/auth/register', payload);
+  if (data?.token) setAuthToken(data.token);
   state.user = data?.user || null;
   state.loaded = true;
   const me = await api.get('/api/auth/me', { silentAuth: true }).catch(() => null);
@@ -107,6 +110,7 @@ export async function logout() {
   } catch (error) {
     console.warn('Logout request failed:', error.message);
   }
+  clearAuthToken();
   state.user = null;
   state.preferences = null;
   state.loaded = true;
@@ -127,6 +131,7 @@ export function setPreferences(preferences) {
 }
 
 setUnauthorizedHandler(() => {
+  clearAuthToken();
   if (!state.user) return;
   state.user = null;
   state.preferences = null;

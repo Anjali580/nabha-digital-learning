@@ -1,0 +1,43 @@
+<!doctype html>
+<!-- Static-host fallback for SPA deep links. Keep this file in sync with index.html. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="NabhaLearn is a digital learning companion for rural school students in Nabha — learn beyond books, explore beyond classrooms.">
+  <meta name="theme-color" content="#0E9F6E">
+  <!-- Optional API override, e.g. content="https://api.example.com". Empty = auto. -->
+  <meta name="nabha-api-base" content="">
+  <title>NabhaLearn — Learn Beyond Books</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/public.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('nl-theme');
+        var theme = saved === 'dark' || saved === 'light' ? saved
+          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.dataset.theme = theme;
+      } catch (e) { document.documentElement.dataset.theme = 'light'; }
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <div id="app" class="app-root">
+    <div class="boot-screen" role="status" aria-live="polite">
+      <div class="boot-mark">NL</div>
+      <div class="boot-bar"><span></span></div>
+      <p>Opening NabhaLearn…</p>
+    </div>
+  </div>
+  <div id="toasts" class="toast-stack" aria-live="polite" aria-atomic="false"></div>
+  <div id="modal-root"></div>
+  <noscript>
+    <div class="noscript">NabhaLearn needs JavaScript enabled to show lessons, quizzes and your progress.</div>
+  </noscript>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

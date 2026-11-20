@@ -25,7 +25,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Configuration
 @EnableWebSecurity
@@ -86,18 +89,62 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Origins that must always work regardless of how CORS_ORIGINS is set in
+     * the hosting dashboard. This prevents a stale or incomplete environment
+     * variable from breaking the deployed frontend.
+     */
+    private static final List<String> REQUIRED_ORIGINS = List.of(
+            "https://nabha-digital-learning-q5z8.onrender.com",
+            "https://nabha-digital-learning.onrender.com",
+            "https://nabha-digital-learning-backend.onrender.com",
+            "http://localhost:8080",
+            "http://127.0.0.1:8080",
+            "http://localhost:5500",
+            "http://127.0.0.1:5500",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000"
+    );
+
+    /** Wildcard patterns for Render previews and local development ports. */
+    private static final List<String> REQUIRED_ORIGIN_PATTERNS = List.of(
+            "https://nabha-digital-learning-*.onrender.com",
+            "http://localhost:*",
+            "http://127.0.0.1:*"
+    );
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        Set<String> originPatterns = new LinkedHashSet<>();
+
+        for (String origin : properties.getCors().getAllowedOrigins()) {
+            if (origin == null || origin.isBlank()) continue;
+            String normalized = origin.trim();
+            if (!normalized.equals("*") && normalized.endsWith("/")) {
+                normalized = normalized.substring(0, normalized.length() - 1);
+            }
+            originPatterns.add(normalized);
+        }
+        originPatterns.addAll(REQUIRED_ORIGINS);
+        originPatterns.addAll(REQUIRED_ORIGIN_PATTERNS);
+
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(properties.getCors().getAllowedOrigins());
+        // Patterns (rather than fixed origins) keep credentials working and
+        // also handle preview hostnames such as nabha-digital-learning-abc123.
+        config.setAllowedOriginPatterns(new ArrayList<>(originPatterns));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Content-Type", "Authorization", CsrfHeaderFilter.HEADER));
-        config.setExposedHeaders(List.of("Content-Disposition"));
+        // Use "*" so the browser's requested header casing (usually lowercase
+        // in Access-Control-Request-Headers) is echoed correctly. Origins are
+        // still restricted to the list above, so this is not open CORS.
+        config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("Content-Disposition", "X-Request-Id"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", config);
+        // Register for every path so preflights and error responses also get
+        // the CORS headers, not just /api/**.
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }

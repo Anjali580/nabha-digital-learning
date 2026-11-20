@@ -1,13 +1,20 @@
 /**
- * Single API client. The JWT lives in an HttpOnly cookie, so every request uses
- * `credentials: "same-origin"` and the browser attaches it automatically.
+ * Single API client.
+ *
+ * The JWT lives in an HttpOnly cookie, so cookie-capable browsers attach it
+ * automatically (`credentials: "include"` when the API is cross-origin).
+ * Browsers that block third-party cookies fall back to the Bearer token from
+ * localStorage, which the backend also accepts.
  *
  * Mutating requests also carry `X-NabhaLearn-Client: web`; the server rejects
  * state-changing API calls without it as a second line of CSRF defence.
  */
 
-const CLIENT_HEADER = 'X-NabhaLearn-Client';
-const CLIENT_VALUE = 'web';
+import { CONFIG } from './config.js';
+import { clearAuthToken, getAuthToken } from './token.js';
+
+const CLIENT_HEADER = CONFIG.CLIENT_HEADER;
+const CLIENT_VALUE = CONFIG.CLIENT_VALUE;
 
 export class ApiError extends Error {
   constructor(message, { status = 0, errors = null, code = 'API_ERROR' } = {}) {
@@ -27,7 +34,11 @@ export function setUnauthorizedHandler(handler) {
 }
 
 function buildUrl(path, query) {
-  const url = new URL(path, window.location.origin);
+  const base = (CONFIG.API_BASE_URL || '').replace(/\/+$/, '');
+  const apiPath = path.startsWith('/') ? path : '/' + path;
+  const url = base
+    ? new URL(base + apiPath)
+    : new URL(apiPath, window.location.origin);
   if (query) {
     Object.entries(query).forEach(([key, value]) => {
       if (value === undefined || value === null || value === '') return;
@@ -35,7 +46,7 @@ function buildUrl(path, query) {
       else url.searchParams.set(key, value);
     });
   }
-  return url.pathname + url.search;
+  return base ? url.href : (url.pathname + url.search);
 }
 
 /**
@@ -48,6 +59,12 @@ export async function request(path, options = {}) {
   } = options;
   const mutating = !['GET', 'HEAD', 'OPTIONS'].includes(method.toUpperCase());
   const headers = { Accept: 'application/json', [CLIENT_HEADER]: CLIENT_VALUE };
+
+  // Cookie-first, Bearer fallback. Browsers that block third-party cookies
+  // still authenticate because the server accepts the Authorization header.
+  const token = getAuthToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+
   let payload;
 
   if (formData) {
@@ -57,24 +74,45 @@ export async function request(path, options = {}) {
     payload = JSON.stringify(body);
   }
 
+  const crossOrigin = Boolean(CONFIG.API_BASE_URL) && (() => {
+    try { return new URL(CONFIG.API_BASE_URL).origin !== window.location.origin; }
+    catch { return false; }
+  })();
+
+  // Optional client-side timeout from CONFIG.REQUEST_TIMEOUT_MS.
+  let timeoutId = null;
+  let timedOut = false;
+  let requestSignal = signal;
+  if (CONFIG.REQUEST_TIMEOUT_MS > 0 && !signal) {
+    const controller = new AbortController();
+    requestSignal = controller.signal;
+    timeoutId = setTimeout(() => { timedOut = true; controller.abort(); }, CONFIG.REQUEST_TIMEOUT_MS);
+  }
+
   let response;
   try {
     response = await fetch(buildUrl(path, query), {
       method,
       headers,
       body: payload,
-      credentials: 'same-origin',
-      signal,
+      credentials: crossOrigin ? 'include' : 'same-origin',
+      signal: requestSignal,
       cache: 'no-store'
     });
   } catch (error) {
-    if (error?.name === 'AbortError') throw error;
+    if (timeoutId) clearTimeout(timeoutId);
+    if (error?.name === 'AbortError') {
+      if (timedOut) throw new ApiError('The request took too long. Please try again.', { status: 0, code: 'TIMEOUT' });
+      throw error;
+    }
     throw new ApiError('Could not reach NabhaLearn. Check your internet connection and try again.', {
       status: 0, code: 'NETWORK_ERROR'
     });
   }
+  if (timeoutId) clearTimeout(timeoutId);
 
   if (response.status === 401) {
+    clearAuthToken();
     if (!silentAuth && typeof unauthorizedHandler === 'function') unauthorizedHandler();
     let message = 'Your session has expired. Please sign in again.';
     try {

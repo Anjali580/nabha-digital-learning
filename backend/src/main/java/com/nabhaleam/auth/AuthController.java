@@ -3,6 +3,7 @@ package com.nabhaleam.auth;
 import com.nabhaleam.auth.dto.*;
 import com.nabhaleam.common.ApiResponse;
 import com.nabhaleam.security.SecurityUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,24 +22,29 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request,
+                                                              HttpServletRequest servletRequest,
                                                               HttpServletResponse response) {
         AuthService.AuthResult result = authService.register(request);
-        response.addHeader(HttpHeaders.SET_COOKIE, cookieService.create(result.token()).toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, cookieService.create(result.token(), servletRequest).toString());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.ok("Your account is ready. Welcome to NabhaLearn!", new AuthResponse(result.user())));
+                .body(ApiResponse.ok("Your account is ready. Welcome to NabhaLearn!",
+                        new AuthResponse(result.user(), result.token())));
     }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request,
+                                                           HttpServletRequest servletRequest,
                                                            HttpServletResponse response) {
         AuthService.AuthResult result = authService.login(request);
-        response.addHeader(HttpHeaders.SET_COOKIE, cookieService.create(result.token()).toString());
-        return ResponseEntity.ok(ApiResponse.ok("Signed in successfully.", new AuthResponse(result.user())));
+        response.addHeader(HttpHeaders.SET_COOKIE, cookieService.create(result.token(), servletRequest).toString());
+        return ResponseEntity.ok(ApiResponse.ok("Signed in successfully.",
+                new AuthResponse(result.user(), result.token())));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(HttpServletResponse response) {
-        response.addHeader(HttpHeaders.SET_COOKIE, cookieService.clear().toString());
+    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest servletRequest,
+                                                    HttpServletResponse response) {
+        response.addHeader(HttpHeaders.SET_COOKIE, cookieService.clear(servletRequest).toString());
         return ResponseEntity.ok(ApiResponse.message("You have been signed out."));
     }
 

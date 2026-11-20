@@ -1,4 +1,5 @@
 import { api } from '../api.js';
+import { CONFIG } from '../config.js';
 import { bindBookmarkActions } from '../bookmark.js';
 import { refreshShellStats } from '../components/layout.js';
 import { icon } from '../icons.js';
@@ -23,7 +24,7 @@ function mediaBlock(item) {
   const id = kind === 'YOUTUBE' || /youtu/.test(url) ? youtubeId(item.url) : '';
   if (id) {
     return `<figure class="media-figure">
-      <iframe src="https://www.youtube-nocookie.com/embed/${esc(id)}" title="${esc(item.caption || 'Lesson video')}"
+      <iframe src="${CONFIG.YOUTUBE_EMBED_BASE}/${esc(id)}" title="${esc(item.caption || 'Lesson video')}"
         loading="lazy" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
       ${item.caption ? `<figcaption>${esc(item.caption)}</figcaption>` : ''}
     </figure>`;
