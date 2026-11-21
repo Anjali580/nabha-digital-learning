@@ -15,7 +15,11 @@ spring:
     name: NabhaLearn
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb+srv://youtube:youtube123@cluster0.xf3chsw.mongodb.net/NabhaLearn}
+      # Local development uses the MongoDB instance on this machine. Production
+      # (Render) must set MONGODB_URI to its Atlas connection string. Do not put
+      # a remote cluster here as the default: if it is unreachable the backend
+      # cannot start and every /api call from Live Server becomes a 500.
+      uri: ${MONGODB_URI:mongodb://127.0.0.1:27017/nabhaleam?serverSelectionTimeoutMS=5000}
       auto-index-creation: true
   servlet:
     multipart:
