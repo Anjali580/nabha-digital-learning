@@ -19,7 +19,7 @@ spring:
       # (Render) must set MONGODB_URI to its Atlas connection string. Do not put
       # a remote cluster here as the default: if it is unreachable the backend
       # cannot start and every /api call from Live Server becomes a 500.
-      uri: ${mongodb+srv://youtube:youtube123@cluster0.xf3chsw.mongodb.net/NabhaLearn}
+      uri: ${MONGODB_URI:mongodb+srv://youtube:youtube123@cluster0.xf3chsw.mongodb.net/NabhaLearn}
       auto-index-creation: true
   servlet:
     multipart:
