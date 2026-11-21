@@ -74,6 +74,16 @@ A healthy API response means the Live Server proxy is wired correctly.
 
 - A `401` from `/api/auth/me` on first load is **normal**. It is the app asking
   “is anyone signed in?” before showing the login page.
+- **A `500` on every `/api/...` request means the backend is not listening on
+  port 8080.** Live Server forwards `/api` to `http://127.0.0.1:8080`; when
+  nothing answers there, the proxy returns
+  `Error: connect ECONNREFUSED 127.0.0.1:8080` with status 500. Check with
+  `curl -s http://127.0.0.1:8080/api/health` and start the backend.
+- The backend will **not start** if it cannot reach MongoDB. Local runs use
+  `mongodb://127.0.0.1:27017/nabhaleam` by default, so start MongoDB first
+  (`brew services start mongodb-community`) or set `MONGODB_URI` to a reachable
+  cluster. A remote `MONGODB_URI` that times out produces the same "every API
+  returns 500" symptom because Tomcat never comes up.
 - If `/api/auth/login` starts returning `500` right after you recompile the
   backend, the running JVM is mixing old and new classes. Stop the backend and
   start it again (in IntelliJ: stop the run configuration, then Run). Do not
@@ -92,7 +102,7 @@ The production deployment uses two Render services:
 
 | Variable        | Value / notes |
 | --------------- | ------------- |
-| `MONGODB_URI`   | MongoDB connection string. Falls back to the Atlas demo cluster if unset. |
+| `MONGODB_URI`   | MongoDB connection string. **Required on Render.** Local runs default to `mongodb://127.0.0.1:27017/nabhaleam`. |
 | `JWT_SECRET`    | Long random string. If unset, a random key is generated at boot and sessions end on restart. |
 | `CORS_ORIGINS`  | Comma-separated extra origins. The Render frontend and localhost origins are always allowed by `SecurityConfig`, even if this value is stale. |
 | `SECURE_COOKIE` | `true` on Render. The app also detects HTTPS automatically via `X-Forwarded-Proto`. |

@@ -60,6 +60,9 @@ public class SecurityConfig {
                                 "/register", "/privacy", "/terms", "/app", "/app/**",
                                 "/css/**", "/js/**", "/assets/**", "/favicon.ico", "/robots.txt").permitAll()
                         .requestMatchers("/api/health", "/api/auth/register", "/api/auth/login").permitAll()
+                        // A guest session probe must succeed with empty data so the
+                        // SPA can ask "who is signed in?" without a 401 in the console.
+                        .requestMatchers(HttpMethod.GET, "/api/auth/me").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/contact").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/classes/**", "/api/schools/**",
                                 "/api/subjects/**", "/api/chapters/**", "/api/explore/**").permitAll()

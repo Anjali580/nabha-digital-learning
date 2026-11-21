@@ -165,7 +165,8 @@ public class TeacherService {
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> ApiException.notFound("Assignment not found."));
         SchoolClass schoolClass = classRepository.findById(assignment.getClassId()).orElse(null);
-        Subject subject = subjectRepository.findById(assignment.getSubjectId()).orElse(null);
+        Subject subject = assignment.getSubjectId() == null ? null
+                : subjectRepository.findById(assignment.getSubjectId()).orElse(null);
         List<User> students = userRepository.findByRoleAndActiveTrue(Role.STUDENT);
         List<AssignmentSubmission> submissions = submissionRepository.findByAssignmentId(assignmentId);
 

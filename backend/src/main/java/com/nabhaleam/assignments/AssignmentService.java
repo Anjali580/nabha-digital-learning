@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +43,11 @@ public class AssignmentService {
         submissionRepository.findByStudentIdOrderBySubmittedAtDesc(student.getId())
                 .forEach(submission -> submissions.put(submission.getAssignmentId(), submission));
         Map<String, Subject> subjects = new HashMap<>();
-        subjectRepository.findAllById(assignments.stream().map(Assignment::getSubjectId).toList())
+        subjectRepository.findAllById(assignments.stream()
+                        .map(Assignment::getSubjectId)
+                        .filter(Objects::nonNull)
+                        .distinct()
+                        .toList())
                 .forEach(subject -> subjects.put(subject.getId(), subject));
 
         return assignments.stream()
@@ -58,7 +63,8 @@ public class AssignmentService {
         if (!assignment.getClassId().equals(student.getClassId())) {
             throw ApiException.forbidden("This assignment is not available for your class.");
         }
-        Subject subject = subjectRepository.findById(assignment.getSubjectId()).orElse(null);
+        Subject subject = assignment.getSubjectId() == null ? null
+                : subjectRepository.findById(assignment.getSubjectId()).orElse(null);
         AssignmentSubmission submission = submissionRepository
                 .findByAssignmentIdAndStudentId(assignmentId, student.getId()).orElse(null);
         AssignmentSummary summary = toSummary(assignment, subject, submission);

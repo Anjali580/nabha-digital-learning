@@ -23,6 +23,11 @@ services:
         value: "true"
       - key: JWT_SECRET
         generateValue: true
+      # Local development defaults to MongoDB on 127.0.0.1, so production MUST
+      # provide its Atlas connection string. sync: false keeps the value that is
+      # already set in the Render dashboard.
+      - key: MONGODB_URI
+        sync: false
 
   - type: web
     name: nabha-digital-learning

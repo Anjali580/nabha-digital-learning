@@ -50,6 +50,9 @@ public class AuthController {
 
     @GetMapping("/me")
     public ApiResponse<MeResponse> me() {
-        return ApiResponse.ok(authService.me(SecurityUtils.currentUserId()));
+        String userId = SecurityUtils.currentUserIdOrNull();
+        // Guests get an empty response instead of a 401. The SPA uses this call
+        // on every boot to decide whether to show the login page.
+        return ApiResponse.ok(userId == null ? new MeResponse(null, null) : authService.me(userId));
     }
 }

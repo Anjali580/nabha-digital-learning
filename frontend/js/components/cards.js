@@ -8,7 +8,9 @@ export function subjectCard(subject, { compact = false } = {}) {
   const total = subject.totalTopics ?? subject.topicCount ?? 0;
   const done = subject.completedTopics ?? 0;
   const percentage = subject.percentage ?? subject.progressPercentage ?? 0;
-  return `<a class="subject-card" href="/app/learn/subjects/${esc(subject.id)}" style="--tint:${color}22">
+  // The progress endpoint returns `subjectId`, while the dashboard returns `id`.
+  const subjectId = subject.id ?? subject.subjectId ?? '';
+  return `<a class="subject-card" href="/app/learn/subjects/${esc(subjectId)}" style="--tint:${color}22">
     <div class="subject-card-head">
       ${iconTile(subject.icon || 'book', color, 'lg')}
       <div>

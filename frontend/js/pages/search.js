@@ -2,12 +2,24 @@ import { api } from '../api.js';
 import { icon } from '../icons.js';
 import { emptyState, esc } from '../ui.js';
 
+function collectResults(data) {
+  if (!data) return [];
+  // The API returns grouped results ({ topics, subjects, explore, quizzes }).
+  // Also accept a plain list or a { results } / { items } wrapper so the page
+  // keeps working if the response shape is simplified later.
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data.results)) return data.results;
+  if (Array.isArray(data.items)) return data.items;
+  return ['topics', 'subjects', 'explore', 'quizzes']
+    .flatMap((key) => (Array.isArray(data[key]) ? data[key] : []));
+}
+
 export async function render(ctx) {
   const q = ctx.query.get('q') || '';
   let results = [];
   if (q) {
     const { data } = await api.get('/api/student/search', { signal: ctx.signal, query: { q } });
-    results = data?.results || data?.items || data || [];
+    results = collectResults(data);
   }
   return `<div class="page">
     <div class="page-head"><div><h1>Search</h1><p>Find topics, quizzes and articles.</p></div></div>
