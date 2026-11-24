@@ -31,7 +31,7 @@ boot().catch((error) => {
   const root = document.getElementById('app');
   if (root) {
     root.innerHTML = `<div class="boot-screen" style="padding:24px;text-align:center">
-      <div class="boot-mark">NL</div>
+      <img class="boot-mark" src="/assets/logo-mark.png" alt="" width="58" height="58">
       <h1 style="font-size:1.4rem">NabhaLearn could not start</h1>
       <p style="max-width:420px">Please check your connection and reload the page. If the problem continues, the learning server may be offline.</p>
       <button class="btn btn-primary" onclick="window.location.reload()">Reload page</button>

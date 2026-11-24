@@ -31,52 +31,60 @@ export async function render(ctx) {
   const classList = classes || [];
 
   return `<div class="page profile-page">
-    <div class="page-head">
-      <div>
-        <h1>Your profile</h1>
-        <p>${adminRole
-          ? 'Manage your photo, administrator account and school settings.'
-          : staff
-            ? 'Manage your photo, teaching details and workspace preferences.'
-            : 'Manage your photo, account details and learning preferences.'}</p>
-      </div>
-      <div class="page-head-actions">
-        <a class="btn btn-outline btn-sm" href="/app/settings">${icon('settings', 16)} Settings</a>
+    <div class="profile-hero">
+      <div class="profile-hero-glow"></div>
+      <div class="profile-hero-inner">
+        <div class="profile-hero-text">
+          <span class="profile-hero-kicker">${icon('user', 14)} ${esc(role)} profile</span>
+          <h1>Your profile</h1>
+          <p>${adminRole
+            ? 'Manage your photo, administrator account and school settings.'
+            : staff
+              ? 'Manage your photo, teaching details and workspace preferences.'
+              : 'Manage your photo, account details and learning preferences.'}</p>
+        </div>
+        <div class="profile-hero-actions">
+          <a class="btn btn-soft btn-sm" href="/app/settings">${icon('settings', 16)} Settings</a>
+        </div>
       </div>
     </div>
 
     <div class="profile-layout">
-      <aside class="profile-card">
-        <div class="avatar-upload">
-          ${avatar(user)}
-          <label class="avatar-edit" title="Change profile photo">
-            ${icon('camera', 14)}
-            <span class="sr-only">Change profile photo</span>
-            <input type="file" id="avatar-input" accept="image/*" hidden>
-          </label>
-        </div>
-        <h2>${esc(user.fullName || (adminRole ? 'Administrator' : staff ? 'Teacher' : 'Student'))}</h2>
-        <p>${esc(user.email || '')}</p>
-        <div class="profile-badges">
-          <span class="badge ${adminRole ? 'blue' : staff ? 'violet' : 'green'}">${esc(role)}</span>
-          ${!staff && user.className ? `<span class="badge">${esc(user.className)}</span>` : ''}
-          ${teacherOnly && user.degree ? `<span class="badge blue">${esc(user.degree)}</span>` : ''}
-          ${user.demo ? '<span class="badge amber">Demo account</span>' : ''}
-        </div>
-        <div class="profile-meta">
-          <div class="profile-meta-row"><span>School</span><strong>${esc(user.schoolName || 'Not set')}</strong></div>
-          ${teacherOnly
-            ? `<div class="profile-meta-row"><span>Qualification</span><strong>${esc(user.degree || 'Not set')}</strong></div>`
-            : ''}
-          <div class="profile-meta-row"><span>Language</span><strong>${esc(language)}</strong></div>
-          ${staff
-            ? `<div class="profile-meta-row"><span>Role</span><strong>${esc(role)}</strong></div>`
-            : `<div class="profile-meta-row"><span>Daily goal</span><strong>${dailyGoal} topic${dailyGoal === 1 ? '' : 's'}</strong></div>`}
+      <aside class="profile-card profile-card--hero">
+        <div class="profile-card-cover"></div>
+        <div class="profile-card-body">
+          <div class="avatar-upload">
+            <span class="avatar-ring" aria-hidden="true"></span>
+            ${avatar(user)}
+            <label class="avatar-edit" title="Change profile photo">
+              ${icon('camera', 14)}
+              <span class="sr-only">Change profile photo</span>
+              <input type="file" id="avatar-input" accept="image/*" hidden>
+            </label>
+          </div>
+          <h2>${esc(user.fullName || (adminRole ? 'Administrator' : staff ? 'Teacher' : 'Student'))}</h2>
+          <p class="profile-email">${esc(user.email || '')}</p>
+          <div class="profile-badges">
+            <span class="badge ${adminRole ? 'blue' : staff ? 'violet' : 'green'}">${esc(role)}</span>
+            ${!staff && user.className ? `<span class="badge">${esc(user.className)}</span>` : ''}
+            ${teacherOnly && user.degree ? `<span class="badge blue">${esc(user.degree)}</span>` : ''}
+            ${user.demo ? '<span class="badge amber">Demo account</span>' : ''}
+          </div>
+          <div class="profile-meta">
+            <div class="profile-meta-row"><span>School</span><strong>${esc(user.schoolName || 'Not set')}</strong></div>
+            ${teacherOnly
+              ? `<div class="profile-meta-row"><span>Qualification</span><strong>${esc(user.degree || 'Not set')}</strong></div>`
+              : ''}
+            <div class="profile-meta-row"><span>Language</span><strong>${esc(language)}</strong></div>
+            ${staff
+              ? `<div class="profile-meta-row"><span>Role</span><strong>${esc(role)}</strong></div>`
+              : `<div class="profile-meta-row"><span>Daily goal</span><strong>${dailyGoal} topic${dailyGoal === 1 ? '' : 's'}</strong></div>`}
+          </div>
         </div>
       </aside>
 
-      <div class="stack-md">
-        <section class="panel">
+      <div class="stack-md profile-stack">
+        <section class="panel profile-panel">
           <div class="panel-head">
             <div class="row">
               <span class="icon-tile sm">${icon('user', 18)}</span>
@@ -131,7 +139,7 @@ export async function render(ctx) {
           </div>
         </section>
 
-        <section class="panel">
+        <section class="panel profile-panel">
           <div class="panel-head">
             <div class="row">
               <span class="icon-tile sm">${icon('settings', 18)}</span>
@@ -189,7 +197,7 @@ export async function render(ctx) {
           </div>
         </section>
 
-        <section class="panel">
+        <section class="panel profile-panel">
           <div class="panel-head">
             <div class="row">
               <span class="icon-tile sm">${icon('lock', 18)}</span>

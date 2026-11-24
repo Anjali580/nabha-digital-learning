@@ -17,7 +17,7 @@ function aside(mode) {
   const isRegister = mode === 'register';
   return `<aside class="auth-aside">
     <a class="brand" href="/" aria-label="NabhaLearn home">
-      <span class="brand-mark" aria-hidden="true">NL</span>
+      <img class="brand-mark" src="/assets/logo-mark.png" alt="" width="46" height="46" decoding="async">
       <span class="brand-text"><strong>NabhaLearn</strong><small>Learn Beyond Books</small></span>
     </a>
     <div class="auth-aside-inner">
@@ -172,7 +172,7 @@ export async function render(ctx) {
           <span class="auth-secure">${icon('lock', 13)} Safe &amp; secure</span>
         </div>
         <div class="auth-mobile-brand">
-          <span class="brand-mark" aria-hidden="true">NL</span>
+          <img class="brand-mark" src="/assets/logo-mark.png" alt="" width="46" height="46" decoding="async">
           <span class="brand-text"><strong>NabhaLearn</strong><small>Learn Beyond Books</small></span>
         </div>
         <header class="auth-head">

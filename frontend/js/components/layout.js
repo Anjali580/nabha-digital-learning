@@ -27,7 +27,7 @@ function persistThemePreference(theme) {
 
 export function brandLockup({ href = '/', compact = false } = {}) {
   return `<a class="brand" href="${href}" aria-label="NabhaLearn home">
-    <span class="brand-mark" aria-hidden="true">NL</span>
+    <img class="brand-mark" src="/assets/logo-mark.png" alt="" width="46" height="46" decoding="async">
     <span class="brand-text">
       <strong>NabhaLearn</strong>
       <small>Learn Beyond Books</small>

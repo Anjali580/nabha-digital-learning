@@ -30,30 +30,15 @@
 .brand-mark {
   width: 46px;
   height: 46px;
+  display: block;
+  object-fit: contain;
   border-radius: 14px;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(145deg, #12b37d, #0a855c);
-  color: #fff;
-  font-weight: 800;
-  font-size: 16px;
-  letter-spacing: -0.05em;
-  box-shadow: 0 10px 20px color-mix(in srgb, var(--brand) 30%, transparent);
-  position: relative;
-  overflow: hidden;
   flex: none;
+  filter: drop-shadow(0 8px 14px color-mix(in srgb, var(--brand) 26%, transparent));
 }
-.brand-mark::after {
-  content: "";
-  position: absolute;
-  width: 24px; height: 24px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.16);
-  top: -8px; right: -8px;
-}
-.brand-text { display: grid; line-height: 1.12; }
-.brand-text strong { font-size: 20px; font-weight: 800; letter-spacing: -0.035em; color: var(--ink); }
-.brand-text small { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand-strong); font-weight: 800; margin-top: 3px; }
+.brand-text { display: grid; line-height: 1.1; align-content: center; }
+.brand-text strong { font-size: 20px; font-weight: 800; letter-spacing: -0.035em; color: var(--ink); line-height: 1.05; }
+.brand-text small { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand-strong); font-weight: 800; margin-top: 4px; line-height: 1; }
 .site-nav {
   display: flex;
   align-items: center;
@@ -708,7 +693,7 @@ html[data-theme="dark"] .site-footer { background: #07110d; }
 }
 .auth-aside .brand-text strong { color: #fff; }
 .auth-aside .brand-text small { color: #8ff0c8; }
-.auth-aside .brand-mark { background: rgba(255,255,255,.14); box-shadow: none; backdrop-filter: blur(6px); }
+.auth-aside .brand-mark { filter: drop-shadow(0 10px 18px rgba(0,0,0,.32)); }
 .auth-aside-inner {
   flex: 1;
   display: flex;
@@ -1103,7 +1088,7 @@ html[data-theme="dark"] .contact-note { color: var(--amber); }
 @media (max-width: 620px) {
   :root { --header-h: 72px; }
   .site-header-inner { gap: 10px; }
-  .brand-mark { width: 40px; height: 40px; border-radius: 12px; font-size: 14px; }
+  .brand-mark { width: 40px; height: 40px; border-radius: 12px; }
   .brand-text strong { font-size: 17px; }
   .brand-text small { font-size: 9px; }
   .site-actions { margin-left: auto; }
