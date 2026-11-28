@@ -28,6 +28,23 @@ export class ApiError extends Error {
 
 let unauthorizedHandler = null;
 
+const isLocalDev = () => {
+  try {
+    const { hostname } = window.location;
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1'
+      || hostname.endsWith('.localhost');
+  } catch {
+    return false;
+  }
+};
+
+/** Message shown when the API cannot be reached at all. */
+function backendOfflineMessage() {
+  return isLocalDev()
+    ? 'The NabhaLearn backend is not running. Start it with "cd backend && mvn spring-boot:run" (or run ./dev.sh), then try again.'
+    : 'The learning server is temporarily unavailable. Please try again in a moment.';
+}
+
 /** Register a callback invoked whenever the server says the session expired. */
 export function setUnauthorizedHandler(handler) {
   unauthorizedHandler = handler;
@@ -105,9 +122,7 @@ export async function request(path, options = {}) {
       if (timedOut) throw new ApiError('The request took too long. Please try again.', { status: 0, code: 'TIMEOUT' });
       throw error;
     }
-    throw new ApiError('Could not reach NabhaLearn. Check your internet connection and try again.', {
-      status: 0, code: 'NETWORK_ERROR'
-    });
+    throw new ApiError(backendOfflineMessage(), { status: 0, code: 'BACKEND_OFFLINE' });
   }
   if (timeoutId) clearTimeout(timeoutId);
 
@@ -131,6 +146,13 @@ export async function request(path, options = {}) {
   }
 
   if (!response.ok) {
+    // A 5xx that is not JSON almost always comes from the dev proxy or a load
+    // balancer: the backend itself is not listening. Show an actionable message
+    // instead of the generic "Something went wrong".
+    const proxyFailure = response.status >= 500 && !contentType.includes('application/json');
+    if (proxyFailure || [502, 503, 504].includes(response.status)) {
+      throw new ApiError(backendOfflineMessage(), { status: response.status, code: 'BACKEND_OFFLINE' });
+    }
     const message = data?.message || defaultMessage(response.status);
     throw new ApiError(message, {
       status: response.status,

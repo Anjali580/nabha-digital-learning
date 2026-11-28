@@ -204,16 +204,33 @@ export function skeletonCards(count = 3, className = 'grid-3') {
 
 /* -------------------------------------------------------------------- toasts */
 const ICONS = { success: 'check-circle', error: 'alert', info: 'info' };
+const activeToasts = new Map();
+const MAX_TOASTS = 4;
 
 export function toast(message, type = 'success', duration = 3600) {
   const root = document.getElementById('toasts');
   if (!root) return;
+
+  // Never stack the same message over and over (e.g. repeated clicks while the
+  // backend is down). One visible copy is enough.
+  const key = `${type}:${message}`;
+  const existing = activeToasts.get(key);
+  if (existing && existing.isConnected) return;
+
   const node = document.createElement('div');
   node.className = `toast ${type}`;
   node.setAttribute('role', type === 'error' ? 'alert' : 'status');
   node.innerHTML = `${icon(ICONS[type] || 'info', 19)}<span>${esc(message)}</span>`;
   root.appendChild(node);
+  activeToasts.set(key, node);
+
+  // Keep the stack readable even when several different errors arrive together.
+  while (root.children.length > MAX_TOASTS) {
+    root.firstElementChild?.remove();
+  }
+
   const remove = () => {
+    if (activeToasts.get(key) === node) activeToasts.delete(key);
     node.classList.add('leaving');
     setTimeout(() => node.remove(), 230);
   };

@@ -1,6 +1,6 @@
 import { api, setUnauthorizedHandler } from './api.js';
 import { clearAuthToken, setAuthToken } from './token.js';
-import { applyTheme } from './ui.js';
+import { applyTheme, toast } from './ui.js';
 
 const listeners = new Set();
 
@@ -62,6 +62,7 @@ export async function loadSession({ force = false } = {}) {
       }
     } catch (error) {
       if (error?.status !== 401) console.warn('Could not load session:', error.message);
+      if (error?.code === 'BACKEND_OFFLINE') toast(error.message, 'error', 8000);
       state.user = null;
       state.preferences = null;
     } finally {

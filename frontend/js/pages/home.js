@@ -1,6 +1,17 @@
 import { api } from '../api.js';
+import { mountLandingBackground } from '../components/landing-bg.js';
+import { createReveal } from '../components/reveal.js';
 import { icon } from '../icons.js';
 import { esc, iconTile, sectionTitle } from '../ui.js';
+
+/* Marks an element for the scroll-reveal helper, with an optional stagger. */
+const rv = (delay = 0) => (delay ? `data-reveal style="--reveal-delay:${delay}ms"` : 'data-reveal');
+
+/* A drifting glow layer for a section. `tone` picks the palette:
+   '' = brand/blue, 'warm' = amber/rose, 'cool' = violet/brand. */
+const ambient = (tone = '') => `<div class="section-ambient${tone ? ` ${tone}` : ''}" aria-hidden="true">
+        <span class="glow g1"></span><span class="glow g2"></span>
+      </div>`;
 
 const FEATURES = [
   ['book-open', 'Structured lessons', 'Every subject is organised into chapters and short topics, so you always know the next step.', '#0E9F6E'],
@@ -35,14 +46,23 @@ const BENEFITS = [
 export async function render() {
   return `
   <section class="hero">
-    <span class="hero-blob one"></span>
-    <span class="hero-blob two"></span>
-    <span class="hero-blob three"></span>
-    <span class="hero-doodle d1">${icon('sparkles', 38)}</span>
-    <span class="hero-doodle d2">${icon('book-open', 46)}</span>
-    <span class="hero-doodle d3">${icon('star', 24)}</span>
+    <div class="hero-bg" data-hero-bg aria-hidden="true">
+      <div class="hero-bg-aurora">
+        <span class="aurora a1"></span>
+        <span class="aurora a2"></span>
+        <span class="aurora a3"></span>
+      </div>
+      <div class="hero-bg-grid"></div>
+      <canvas class="hero-bg-canvas" data-bg-canvas></canvas>
+      <div class="hero-bg-float" data-parallax="1.5">
+        <span class="bg-doodle d1">${icon('sparkles', 38)}</span>
+        <span class="bg-doodle d2">${icon('book-open', 46)}</span>
+        <span class="bg-doodle d3">${icon('star', 24)}</span>
+      </div>
+      <div class="hero-bg-spotlight" data-bg-spotlight></div>
+    </div>
     <div class="container hero-grid">
-      <div class="hero-copy">
+      <div class="hero-copy" ${rv()}>
         <span class="hero-badge"><span class="icon-tile">${icon('leaf', 14)}</span> Learning for every child in Nabha</span>
         <h1>Small Steps,<br><span class="accent">Brighter</span> Futures</h1>
         <p class="hero-lead">A friendly learning companion for rural school students. Understand your lessons, practise at your own pace, and explore the world beyond the textbook — all in one place.</p>
@@ -56,7 +76,7 @@ export async function render() {
           <li>${icon('check-circle', 16)} Free to use</li>
         </ul>
       </div>
-      <div class="hero-visual">
+      <div class="hero-visual" ${rv(140)} data-tilt="5">
         <div class="hero-card">
           <img src="/assets/classroom.svg" alt="A teacher and three students learning together in a bright classroom" width="800" height="620">
         </div>
@@ -81,8 +101,9 @@ export async function render() {
   </section>
 
   <section class="section" id="about" style="padding-top:130px">
+    ${ambient()}
     <div class="container about-grid">
-      <div class="about-media">
+      <div class="about-media" ${rv()}>
         <div class="main-shot"><img src="/assets/learning-together.svg" alt="Two students sharing a tablet under a tree near their school" width="760" height="560"></div>
         <div class="quote-chip">“Learning should feel possible, not overwhelming.”</div>
         <div class="stat-card">
@@ -90,7 +111,7 @@ export async function render() {
           <div><strong>Built for Nabha, Punjab</strong><small>Examples, language and pace shaped around rural learners.</small></div>
         </div>
       </div>
-      <div class="about-copy">
+      <div class="about-copy" ${rv(90)}>
         <span class="eyebrow">Our approach</span>
         <h2>A calm place to learn, not another noisy app</h2>
         <p>NabhaLearn brings the school syllabus, practice and progress together in a simple interface. No feed, no distractions, no invented leaderboards — just the next useful lesson.</p>
@@ -109,13 +130,13 @@ export async function render() {
 
   <section class="section tint" id="features">
     <div class="container">
-      <div class="section-head center">
+      <div class="section-head center" ${rv()}>
         <span class="eyebrow">Everything in one place</span>
         <h2>Six tools that support real learning</h2>
         <p>Each feature connects to the same account and the same syllabus, so nothing you do disappears into a separate app.</p>
       </div>
       <div class="feature-grid">
-        ${FEATURES.map(([iconName, title, text, color], index) => `<article class="feature-card ${['', 'blue', 'amber', 'violet', 'rose', ''][index]}">
+        ${FEATURES.map(([iconName, title, text, color], index) => `<article class="feature-card ${['', 'blue', 'amber', 'violet', 'rose', ''][index]}" ${rv(index * 70)}>
           ${iconTile(iconName, color, 'lg')}
           <h3>${title}</h3>
           <p>${text}</p>
@@ -126,13 +147,13 @@ export async function render() {
 
   <section class="section" id="how-it-works">
     <div class="container">
-      <div class="section-head center">
+      <div class="section-head center" ${rv()}>
         <span class="eyebrow">How it works</span>
         <h2>Three steps, repeated at your pace</h2>
         <p>You do not need to finish everything at once. One topic today is progress.</p>
       </div>
       <div class="steps">
-        ${STEPS.map(([num, title, text, tag]) => `<article class="step-card">
+        ${STEPS.map(([num, title, text, tag], index) => `<article class="step-card" ${rv(index * 90)}>
           <div class="step-num">${num}</div>
           <h3>${title}</h3>
           <p>${text}</p>
@@ -144,7 +165,7 @@ export async function render() {
 
   <section class="section mint" id="explore">
     <div class="container">
-      <div class="section-head split">
+      <div class="section-head split" ${rv()}>
         <div>
           <span class="eyebrow">Explore beyond the book</span>
           <h2>Twelve doors to curiosity</h2>
@@ -160,7 +181,7 @@ export async function render() {
 
   <section class="section" id="why">
     <div class="container why-grid">
-      <div class="why-visual">
+      <div class="why-visual" ${rv()}>
         <div class="why-panel">
           <h3>What “brighter” means here</h3>
           <p>Not a promise of perfect marks. A steady habit of understanding one more thing each day.</p>
@@ -176,7 +197,7 @@ export async function render() {
           <div><strong>One topic a day</strong><small>Small, doable, real</small></div>
         </div>
       </div>
-      <div class="why-copy">
+      <div class="why-copy" ${rv(90)}>
         <span class="eyebrow">Why NabhaLearn</span>
         <h2>Designed for the phone you actually have</h2>
         <p>Many learning apps assume fast Wi-Fi, a new device and hours of free time. NabhaLearn starts from a different assumption: you may have twenty minutes, a shared phone and a weak signal.</p>
@@ -196,7 +217,7 @@ export async function render() {
 
   <section class="section tight">
     <div class="container">
-      <div class="cta-band">
+      <div class="cta-band" ${rv()}>
         <div>
           <h2>Your next lesson is already waiting.</h2>
           <p>Join with your class, learn at your own pace, and keep every step of your progress in one place.</p>
@@ -210,15 +231,39 @@ export async function render() {
   </section>`;
 }
 
+let teardown = null;
+
+/** Called by the router before leaving the landing page. */
+export function cleanup() {
+  teardown?.();
+  teardown = null;
+}
+
 export async function mount(ctx) {
-  const grid = document.getElementById('home-categories');
+  cleanup();
+
+  const root = ctx.root || document;
+  const reveal = createReveal({ signal: ctx.signal });
+  reveal.scan(root);
+
+  const stopBackground = mountLandingBackground(root.querySelector('[data-hero-bg]'), {
+    signal: ctx.signal
+  });
+
+  teardown = () => {
+    stopBackground();
+    reveal.stop();
+  };
+
+  const grid = root.querySelector('#home-categories');
   if (!grid) return;
+
   try {
     const { data } = await api.get('/api/explore/categories', { signal: ctx.signal });
     if (!Array.isArray(data) || !data.length) throw new Error('No categories');
-    grid.innerHTML = data.map((category) => {
+    grid.innerHTML = data.map((category, index) => {
       const next = `/app/explore?category=${encodeURIComponent(category.slug)}`;
-      return `<a class="category-card" href="/login?next=${encodeURIComponent(next)}">
+      return `<a class="category-card" href="/login?next=${encodeURIComponent(next)}" ${rv(index * 45)}>
         <span class="cat-icon" style="background:${esc(category.color)}">${icon(category.icon || 'compass', 21)}</span>
         <h4>${esc(category.title)}</h4>
         <p>${esc(category.description || '')}</p>
@@ -228,6 +273,7 @@ export async function mount(ctx) {
         </div>
       </a>`;
     }).join('');
+    reveal.scan(grid);
   } catch (error) {
     if (error.name === 'AbortError') return;
     grid.innerHTML = `<div class="panel" style="padding:24px;grid-column:1/-1">

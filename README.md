@@ -29,7 +29,10 @@ demo data is seeded automatically on first start.
 ## Run it with the Go Live button
 
 1. Start MongoDB and the backend (`cd backend && mvn spring-boot:run`) and wait
-   until you see `Started NabhaLearnApplication`.
+   until you see `Started NabhaLearnApplication`. The easiest way is `./dev.sh`,
+   which starts MongoDB (Homebrew) and the backend for you. VS Code also runs
+   that script automatically when the workspace opens (`.vscode/tasks.json`); if
+   VS Code asks whether to allow automatic tasks, choose **Allow**.
 2. Open the **repository root** in VS Code (not the `frontend` folder).
 3. Click **Go Live** in the status bar (or right-click `frontend/index.html` →
    **Open with Live Server**).
@@ -78,7 +81,9 @@ A healthy API response means the Live Server proxy is wired correctly.
   port 8080.** Live Server forwards `/api` to `http://127.0.0.1:8080`; when
   nothing answers there, the proxy returns
   `Error: connect ECONNREFUSED 127.0.0.1:8080` with status 500. Check with
-  `curl -s http://127.0.0.1:8080/api/health` and start the backend.
+  `curl -s http://127.0.0.1:8080/api/health` and start the backend (`./dev.sh`).
+  The app now detects this case and shows a single message telling you to start
+  the backend instead of a wall of "Something went wrong" toasts.
 - The backend will **not start** if it cannot reach MongoDB. Local runs use
   `mongodb://127.0.0.1:27017/nabhaleam` by default, so start MongoDB first
   (`brew services start mongodb-community`) or set `MONGODB_URI` to a reachable

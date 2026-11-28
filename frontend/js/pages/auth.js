@@ -275,7 +275,7 @@ export async function mount(ctx) {
       } catch (error) {
         if (error.name === 'AbortError') return;
         showFieldErrors(form, error.errors || {}, error.message);
-        toast(error.message, 'error');
+        if (error.errors && Object.keys(error.errors).length) toast(error.message, 'error');
       } finally {
         setBusy(button, false);
       }
@@ -318,7 +318,7 @@ export async function mount(ctx) {
     } catch (error) {
       if (error.name === 'AbortError') return;
       showFieldErrors(form, error.errors || {}, error.message);
-      toast(error.message, 'error');
+      if (error.errors && Object.keys(error.errors).length) toast(error.message, 'error');
     } finally {
       setBusy(button, false);
     }

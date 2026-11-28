@@ -92,44 +92,122 @@
 /* ------------------------------------------------------------------- hero */
 .hero {
   position: relative;
-  overflow: hidden;
   background: var(--hero-gradient);
   padding: 64px 0 0;
   isolation: isolate;
 }
-.hero::before {
-  content: "";
+/* The hero itself must stay unclipped so the feature strip can overlap into the
+   next section; the decorative layer does its own clipping instead. */
+.hero > .container { position: relative; z-index: 2; }
+
+/* ------------------------------------------------------------ hero backdrop */
+.hero-bg {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle at 1px 1px, rgba(20, 37, 68, 0.07) 1px, transparent 0);
-  background-size: 26px 26px;
-  opacity: 0.5;
-  mask-image: linear-gradient(to bottom, #000 0%, transparent 72%);
-  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+  contain: paint;
+  /* Fade the very bottom so the backdrop melts into the section below instead
+     of ending on a hard line. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 76%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 76%, transparent 100%);
 }
-.hero-blob {
+
+.hero-bg-aurora,
+.hero-bg-grid,
+.hero-bg-canvas,
+.hero-bg-float {
+  position: absolute;
+  inset: 0;
+}
+
+/* 1 — slow colour fields -------------------------------------------------- */
+.hero-bg-aurora { inset: -10%; }
+.hero-bg-aurora .aurora {
   position: absolute;
   border-radius: 50%;
-  filter: blur(8px);
-  opacity: 0.6;
-  z-index: -1;
-  animation: drift 16s ease-in-out infinite;
-  pointer-events: none;
+  will-change: transform;
+  animation: aurora-drift 26s var(--ease) infinite alternate;
 }
-.hero-blob.one { width: 340px; height: 340px; background: radial-gradient(circle, #b9f0d9, transparent 70%); top: -90px; left: -80px; }
-.hero-blob.two { width: 420px; height: 420px; background: radial-gradient(circle, #d5e3ff, transparent 70%); top: 40px; right: -160px; animation-delay: -6s; }
-.hero-blob.three { width: 280px; height: 280px; background: radial-gradient(circle, #ffefbc, transparent 70%); bottom: -120px; left: 44%; animation-delay: -10s; }
-.hero-doodle {
+.hero-bg-aurora .a1 {
+  width: 70vmax; height: 70vmax;
+  left: -22vmax; top: -32vmax;
+  background: radial-gradient(circle, color-mix(in srgb, var(--brand) 24%, transparent) 0%, transparent 62%);
+}
+.hero-bg-aurora .a2 {
+  width: 62vmax; height: 62vmax;
+  right: -26vmax; top: -18vmax;
+  background: radial-gradient(circle, color-mix(in srgb, var(--blue) 20%, transparent) 0%, transparent 62%);
+  animation-duration: 31s;
+  animation-delay: -8s;
+}
+.hero-bg-aurora .a3 {
+  width: 54vmax; height: 54vmax;
+  left: 32%; bottom: -36vmax;
+  background: radial-gradient(circle, color-mix(in srgb, var(--amber) 18%, transparent) 0%, transparent 64%);
+  animation-duration: 35s;
+  animation-delay: -15s;
+}
+
+/* 2 — drifting grid ------------------------------------------------------- */
+.hero-bg-grid {
+  inset: -96px;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--ink) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 8%, transparent) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: 0.55;
+  -webkit-mask-image: radial-gradient(ellipse 92% 74% at 50% 16%, #000 24%, transparent 76%);
+  mask-image: radial-gradient(ellipse 92% 74% at 50% 16%, #000 24%, transparent 76%);
+  animation: grid-drift 30s linear infinite;
+  will-change: transform;
+}
+
+/* 3 — mote constellation (canvas) ----------------------------------------- */
+.hero-bg-canvas {
+  width: 100%;
+  height: 100%;
+  opacity: 0.9;
+}
+
+/* 4 — doodles with pointer + scroll parallax ------------------------------ */
+.hero-bg-float {
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+.bg-doodle {
   position: absolute;
   color: var(--brand-strong);
-  opacity: 0.42;
-  z-index: -1;
+  opacity: 0.4;
   animation: float-soft 7s ease-in-out infinite;
-  pointer-events: none;
 }
-.hero-doodle.d1 { top: 16%; right: 4%; width: 38px; animation-delay: -2s; }
-.hero-doodle.d2 { bottom: 20%; left: 3%; width: 46px; animation-delay: -4s; }
-.hero-doodle.d3 { top: 58%; right: 46%; width: 24px; opacity: 0.3; animation-delay: -1s; }
+.bg-doodle.d1 { top: 16%; right: 4%; width: 38px; animation-delay: -2s; }
+.bg-doodle.d2 { bottom: 20%; left: 3%; width: 46px; animation-delay: -4s; }
+.bg-doodle.d3 { top: 58%; right: 46%; width: 24px; opacity: 0.3; animation-delay: -1s; }
+
+/* 5 — pointer spotlight --------------------------------------------------- */
+/* A fixed-size disc moved with `transform`, so following the pointer is a
+   compositor job instead of a full-layer repaint every frame. */
+.hero-bg-spotlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 680px;
+  height: 680px;
+  margin: -340px 0 0 -340px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--brand) 16%, transparent) 0%, transparent 62%);
+  opacity: 0.9;
+  transform: translate3d(-999px, -999px, 0);
+  transition: opacity 0.4s var(--ease);
+  will-change: transform;
+}
+html[data-theme="dark"] .hero-bg-spotlight {
+  background: radial-gradient(circle, color-mix(in srgb, var(--brand) 22%, transparent) 0%, transparent 62%);
+}
+html[data-theme="dark"] .hero-bg-grid { opacity: 0.4; }
+html[data-theme="dark"] .hero-bg-canvas { opacity: 1; }
 .hero-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
@@ -1175,4 +1253,50 @@ html[data-theme="dark"] .contact-note { color: var(--amber); }
 @keyframes hero-float {
   0%, 100% { transform: rotate(1.2deg) translateY(0); }
   50% { transform: rotate(0.4deg) translateY(-14px); }
+}
+
+/* ==========================================================================
+   Landing page motion
+   ========================================================================== */
+
+@keyframes aurora-drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(4%, 3%, 0) scale(1.14); }
+  100% { transform: translate3d(-3%, -5%, 0) scale(0.94); }
+}
+
+@keyframes grid-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(64px, 64px, 0); }
+}
+
+/* Scroll reveal. The hidden state is opt-in via `html.reveal-ready`, which the
+   reveal helper adds, so content is never hidden if the script does not run. */
+html.reveal-ready [data-reveal] {
+  opacity: 0;
+  translate: 0 24px;
+  transition:
+    opacity 0.75s var(--ease),
+    translate 0.75s var(--ease);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+html.reveal-ready [data-reveal].is-revealed {
+  opacity: 1;
+  translate: 0 0;
+}
+
+@media (max-width: 620px) {
+  .hero-bg-grid { opacity: 0.35; }
+  .hero-bg-spotlight { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg-aurora .aurora,
+  .hero-bg-grid,
+  .bg-doodle { animation: none; }
+  html.reveal-ready [data-reveal] {
+    opacity: 1;
+    translate: none;
+    transition: none;
+  }
 }
